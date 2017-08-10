@@ -1,0 +1,26 @@
+﻿@model string
+@{
+    ViewBag.Title = "Login";
+}
+
+<div class="panel-primary text-center ">
+    <h1 class="panel-heading">Spurify</h1>
+    <br />
+    <p><a class="btn btn-primary btn-lg" href=@Model>Login to Spotify &raquo;</a></p>
+</div>
+
+<br />
+<br />
+<br />
+
+<div class="panel-info text-center">
+    <button class="btn-block btn-lg btn-collapse" data-toggle="collapse" data-target="#description">What is Spurify</button>
+    <div id="description" class="panel-collapse	collapse">
+        <br />
+        <p>Spurify is a Spotify tool that utilizes the Spotify API as well as the Last.fm API. Spurify provides functionality for users who 
+        scrobble track plays to a Last.fm account by providing a play count for all the songs within a selected playlist. By provided a play count, 
+        users who wish to purify playlists by removing songs they generally do not listen to can easily sort by play count and remove a track directly.</p>
+        <p>For more information on the Spotify API, see <a href="https://developer.spotify.com/web-api">https://developer.spotify.com/web-api</a></p>
+        <p>For more information on the Last.fm API, see <a href="https://www.last.fm/api">https://www.last.fm/api</a></p>
+    </div>
+</div>

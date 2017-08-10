@@ -1,0 +1,76 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.panel-primary {
+    background-color: #FFFFFF;
+}
+    .panel-primary > .panel-heading {
+        background-color: #1ED760;
+        border-color: #1ED760;
+        font-family: Circular, Helvetica, Arial, sans-serif;
+    }
+
+.btn-primary, 
+.btn-primary.active, 
+.btn-primary.disabled {
+    background-color: #1ED760;
+    border-color: #1ED760;
+}
+    .btn-primary:hover {
+        background-color: #17bf53;
+        border-color: #1ED760;
+    }
+
+.progress {
+    height: 25px;
+}
+
+.progress-bar {
+    background-color: #1ED760;
+}
+
+.panel-info {
+    background-color: #ECEBE8;
+    color: #343232;
+    font-size: 16px;
+    padding: 10px 25px;
+}
+    .panel-info > .btn-collapse {
+        background-color: #ECEBE8;
+        color: #343232;
+        font-size: 22px;
+        border-radius: 0;
+        border-style: none;
+        outline: none;
+    }
+
+td {
+    min-width: 110px;
+}
+
+.fa {
+    font-size: 15px !important;
+}
+

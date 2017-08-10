@@ -45,8 +45,6 @@ namespace Spurify.Controllers
         private const string LASTFM_API_KEY = "a4a88b715f00a2baeb78f629bf5787ef";
         private const string LASTFM_LIMIT = "200";
 
-        private const string BLA = "hi :&)";
-
         public const string TOKENS_SESSION = "tokens";
         public const string PROGRESS_SESSION = "progress";
         public const string PLAYLISTID_SESSION = "playlistID";

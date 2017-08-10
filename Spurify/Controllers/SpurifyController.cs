@@ -325,9 +325,10 @@ namespace Spurify.Controllers
             bool done;
 
             using (HttpClient httpClient = new HttpClient()) {
-                foreach(Track track in playlist.Tracks) {
-                    trackName = track.Name.Replace(" ", "%20");
-                    artist = track.Artist.Replace(" ", "%20");
+
+                foreach (Track track in playlist.Tracks) {
+                    trackName = HttpUtility.UrlEncode(track.Name);
+                    artist = HttpUtility.UrlEncode(track.Artist);
 
                     uri = $"http://ws.audioscrobbler.com/2.0/?method=track.getInfo&track={trackName}&artist={artist}&username={user}&autocorrect=1&api_key={LASTFM_API_KEY}&format=json";
 

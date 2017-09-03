@@ -14,33 +14,7 @@ namespace Spurify.Controllers
 {
     public class SpurifyController : Controller {
 
-        private struct SpotifyTokens {
-            public string AccessToken;
-            public string RefreshToken;
-            public DateTime Expires;
-
-            public SpotifyTokens(string accessToken, string refreshToken, DateTime expires) {
-                AccessToken = accessToken;
-                RefreshToken = refreshToken;
-                Expires = expires;
-            }
-
-            public bool IsAccessValid() {
-                return DateTime.Now < Expires;
-            }
-        }
-
         #region Constants
-
-        private const string SPOTIFY_CLIENT_ID = "45c5e785d0644c94a41d23b43ebc9890";
-        private const string SPOTIFY_CLIENT_SECRET = "301e67b7fa5a4b3bbd907a59b2942471";
-
-        private const string REDIRECT = "http://localhost:58405/Spurify/Login";
-        private const string SCOPE = "playlist-read-private%20playlist-read-collaborative%20playlist-modify-public%20playlist-modify-private";
-        private const string SHOW_DIALOG = "true";
-
-        private const string TOKEN_URI = "https://accounts.spotify.com/api/token";
-        private const string PROFILE_URI = "https://api.spotify.com/v1/me";
 
         private const string LASTFM_API_KEY = "a4a88b715f00a2baeb78f629bf5787ef";
         private const string LASTFM_LIMIT = "200";
@@ -54,9 +28,7 @@ namespace Spurify.Controllers
         #region ActionResult Web Handlers
 
         public ActionResult Index() {
-            Object AUTH_URI = $"https://accounts.spotify.com/authorize?client_id={SPOTIFY_CLIENT_ID}&response_type=code&redirect_uri={REDIRECT}&scope={SCOPE}&show_dialog={SHOW_DIALOG}";
-
-            return View(AUTH_URI);
+            return View(SpotifyAPI.AUTH_URL);
         }
 
         public ActionResult Display() {
@@ -73,7 +45,9 @@ namespace Spurify.Controllers
 
         public ActionResult Login() {
             try {
-                Session[TOKENS_SESSION] = GetTokens(Request.QueryString["code"]);
+                SpotifyTokens tokens = new SpotifyTokens();
+                SpotifyAPI.GetTokens(tokens, Request.QueryString["code"]);
+                Session[TOKENS_SESSION] = tokens;
             } catch (NotImplementedException) {
                 throw new Exception(Request.QueryString["error"]);
             }
@@ -93,7 +67,7 @@ namespace Spurify.Controllers
             string name = string.Empty;
             bool next = false;
 
-            using (JsonReader reader = new JsonTextReader(new StreamReader(MakeAPICall(PLAYLISTS_URI)))) {
+            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPI.MakeAPICall(PLAYLISTS_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
                 while (reader.Read()) {
 
                     if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("collaborative")) {
@@ -135,7 +109,7 @@ namespace Spurify.Controllers
             bool finished = false;
 
             while (!finished) {
-                using (JsonReader reader = new JsonTextReader(new StreamReader(MakeAPICall(playListTracksURI)))) {
+                using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPI.MakeAPICall(playListTracksURI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
 
                     while (!finished && reader.Read()) {
 
@@ -201,7 +175,7 @@ namespace Spurify.Controllers
             string uri = $"https://api.spotify.com/v1/users/{GetCurrentUser()}/playlists/{Session[PLAYLISTID_SESSION]}/tracks";
 
             if (!((SpotifyTokens)Session[TOKENS_SESSION]).IsAccessValid()) {
-                Session[TOKENS_SESSION] = RefreshTokens();
+                SpotifyAPI.RefreshTokens(((SpotifyTokens)Session[TOKENS_SESSION]));
             }
 
             using (HttpClient httpClient = new HttpClient()) {
@@ -222,7 +196,7 @@ namespace Spurify.Controllers
         private string GetCurrentUser() {
             string userID = string.Empty;
 
-            using (JsonReader reader = new JsonTextReader(new StreamReader(MakeAPICall(PROFILE_URI)))) {
+            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPI.MakeAPICall(SpotifyAPI.PROFILE_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
                 bool finished = false;
                 while (!finished && reader.Read()) {
                     if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("id")) {
@@ -233,81 +207,6 @@ namespace Spurify.Controllers
                 }
                 return userID;
             }
-        }
-
-        #endregion
-
-        #region Spotify API
-
-        private Stream MakeAPICall(string URI) {
-            if (!((SpotifyTokens)Session[TOKENS_SESSION]).IsAccessValid()) {
-                Session[TOKENS_SESSION] = RefreshTokens();
-            }
-
-            HttpResponseMessage response;
-            using (HttpClient httpClient = new HttpClient()) {
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + ((SpotifyTokens)Session[TOKENS_SESSION]).AccessToken);
-                response = httpClient.GetAsync(URI).Result;
-                response.EnsureSuccessStatusCode();
-            }
-
-            return response.Content.ReadAsStreamAsync().Result;
-        }
-
-        private SpotifyTokens RefreshTokens() {
-            return GetTokens();
-        }
-
-        private SpotifyTokens GetTokens(string authCode = null) {
-            string accessToken = string.Empty;
-            string refreshToken = string.Empty;
-            DateTime expires = DateTime.MinValue;
-
-            using (HttpClient httpClient = new HttpClient()) {
-                Dictionary<string, string> parameters;
-
-                if (authCode != null) {
-
-                    parameters = new Dictionary<string, string> {
-                            { "grant_type", "authorization_code" },
-                            { "code", authCode },
-                            { "redirect_uri", REDIRECT },
-                            { "client_id", SPOTIFY_CLIENT_ID },
-                            { "client_secret", SPOTIFY_CLIENT_SECRET }
-                    };
-
-                } else {
-
-                    parameters = new Dictionary<string, string> {
-                        { "grant_type", "refresh_token" },
-                        { "refresh_token ", ((SpotifyTokens)Session[TOKENS_SESSION]).RefreshToken }
-                    };
-                    httpClient.DefaultRequestHeaders.Add("Authorization", Convert.ToBase64String(Encoding.ASCII.GetBytes(SPOTIFY_CLIENT_ID + ":" + SPOTIFY_CLIENT_SECRET)));
-
-                }
-
-                HttpResponseMessage response = httpClient.PostAsync(TOKEN_URI, new FormUrlEncodedContent(parameters)).Result;
-
-                if (response.StatusCode == HttpStatusCode.OK) {
-                    using (JsonReader reader = new JsonTextReader(new StreamReader(response.Content.ReadAsStreamAsync().Result))) {
-                        while (reader.Read()) {
-                            if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("access_token")) {
-                                reader.Read();
-                                accessToken = (string)reader.Value;
-                            } else if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("refresh_token")) {
-                                reader.Read();
-                                refreshToken = (string)reader.Value;
-                            } else if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("expires_in")) {
-                                reader.Read();
-                                expires = DateTime.Now + TimeSpan.FromSeconds(Double.Parse(reader.Value.ToString()));
-                            }
-                        }
-                    }
-                } else {
-                    throw new HttpException(response.StatusCode.ToString());
-                }
-            }
-            return new SpotifyTokens(accessToken, refreshToken, expires);
         }
 
         #endregion

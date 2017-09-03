@@ -5,8 +5,7 @@
 
 <div id="indexContent" class="mainBorders">
 
-    @if (Session[ApolloController.LOGGEDIN_SESSION] != null &&
-                    (bool)Session[ApolloController.LOGGEDIN_SESSION]) {
+    @if (Session[ApolloController.LOGGEDIN_SESSION] != null) {
         <div class="panel panel-primary text-center">
             <h3 class="panel-heading">Welcome back, start discovering now</h3>
             <a class="panel-body btn btn-primary" href="Discover">Discover</a>

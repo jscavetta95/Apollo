@@ -1,0 +1,64 @@
+﻿@using Apollo.Controllers
+@{
+    ViewBag.Title = "Discover";
+}
+
+<div id="discoverBody" class="mainBorders body">
+    <div id="spotifyPlayerContainer" class="screen">
+        <!-- NOTE: uri will have to be dynamically created to change the album on the widget -->
+        <iframe id="spotifyPlayer" src="" frameborder="10"></iframe>
+    </div>
+
+    <div id="discoverAlbumListContainer" class="screen">
+
+        <!-- Check if logged in -->
+        @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] == null) {
+            <p class="h3">Sign-in or create an account to start discovering</p>
+            <a href="Login" class="btn btn-danger">Register | Login</a>
+        } else {
+            <script>
+                $.ajax({
+                    url: "FillAlbums",
+                    success: function (html_return) {
+                        if (!html_return) {
+                            $("#discoverAlbumListContainer").html('<p class="heading">You must add at least one album as a seed to begin discovering</p>');
+                            $("#discoverAlbumListContainer").append('<a href="../albums/index.php" class="button text">Albums</a>');
+                        } else {
+                            $("#discoverAlbumListContainer").html(html_return);
+
+                            $(document).ready(function () {
+                                $('button').on("click", function () {
+                                    $('button').off("click");
+                                    $.ajax({
+                                        type: "POST",
+                                        async: false,
+                                        url: '../components/discoverButtonPress.php',
+                                        dataType: 'json',
+                                        data:
+                                        {
+                                            buttonType: $(this).attr('id'),
+                                            albumURI: $(this).attr('name')
+                                        }
+                                    });
+                                    location.reload(true);
+                                });
+
+                                $('.albumImgSelect').on("click", function () {
+                                    var url = "https://embed.spotify.com/?uri=";
+                                    var uri = $(this).attr('name');
+                                    var newSrc = url.concat(uri);
+                                    $('#spotifyPlayer').attr("src", newSrc);
+                                    $(".albumImgSelect").css("background", "");
+                                    $(this).css("background", "linear-gradient(to right, #9bc394, #cffac8, #9bc394)");
+                                });
+                            });
+
+                        }
+                    },
+                    type: "GET"
+                });
+
+            </script>
+        }
+    </div>
+</div>

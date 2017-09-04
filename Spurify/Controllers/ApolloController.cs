@@ -11,42 +11,46 @@ using System.Web.Mvc;
 
 namespace Spurify.Controllers {
     public class ApolloController : Controller {
-        public const string LOGGEDIN_SESSION = "LoggedIn";
-        public const string LOGIN_ERROR_SESSION = "LoginError";
 
+        #region Constants
+        public const string LOGGED_IN_USERNAME_SESSION = "LoggedInUsername";
+        public const string LOGGED_IN_USERID_SESSION = "LoggedInUserID";
+        public const string LOGIN_ERROR_SESSION = "LoginError";
+        #endregion
+
+        #region Index
         public ActionResult Index() {
             return View();
         }
+        #endregion
 
+        #region Discover
         public ActionResult Discover() {
-            if(Session[LOGGEDIN_SESSION] == null) {
-                Redirect("Login");
+            if (Session[LOGGED_IN_USERNAME_SESSION] == null) {
+                return Redirect("Login");
             }
 
             return View(GetRecommenedAlbums());
         }
+        #endregion
 
-        private RecommendedAlbums GetRecommenedAlbums() {
-            // Get userID
-            string userID = GetUserID(Session[LOGGEDIN_SESSION].ToString());
+        /// <summary>
+        /// Gets the recommened albums.
+        /// </summary>
+        /// <returns>A <see cref="List{T}"/> of <see cref="Album"/></returns>
+        private List<Album> GetRecommenedAlbums() {
+            // Get userID from the session.
+            string userID = Session[LOGGED_IN_USERID_SESSION].ToString();
+
+            List<Album> recommendedAlbums;
 
             //Retrieve albums currently in recommend table
-            // Setup SQL.
-            string sql = "SELECT albumName, albumURI, albumImageLink FROM recommend JOIN albums USING(album_id) WHERE user_id = @userID";
-            MySqlCommand query = new MySqlCommand(sql);
-            query.Parameters.AddWithValue("@userID", userID);
-
-            // Query Database.
-            MySqlDataReader albumsResult = QueryDatabase(query);
-
-            // Read Albums into RecommendedAlbums
-            RecommendedAlbums recommendedAlbums = new RecommendedAlbums();
-            while (albumsResult.Read()) {
-                recommendedAlbums.Add(new Album(albumsResult.GetString(0), albumsResult.GetString(1), albumsResult.GetString(2)));
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                recommendedAlbums = dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.RECOMMEND);
             }
 
             // If the number of albums is less than 6...
-            if(recommendedAlbums.Count < 6) {
+            if (recommendedAlbums.Count < 6) {
                 // Get more recommendations.
                 GetAlbumRecommendations(userID, recommendedAlbums);
             }
@@ -55,213 +59,156 @@ namespace Spurify.Controllers {
             return recommendedAlbums;
         }
 
-        private void GetAlbumRecommendations(string userID, RecommendedAlbums recommendedAlbums) {    
+        private static List<string> GetSortedRelatedArtistsByCount(string userID, string spotifyAuthToken) {
+            // Initialize the counted map that will be used for related artist proportions.
+            SortedDictionary<string, int> artistCount = new SortedDictionary<string, int>();
 
-            // Get all albumArtists in currently liked albums.
-            // Setup SQL.
-            string sql = "SELECT albumArtist FROM liked_albums JOIN albums USING(album_id) WHERE user_id = @userID";
-            MySqlCommand query = new MySqlCommand(sql);
-            query.Parameters.AddWithValue("@userID", userID);
+            // Open a connection to the database.
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                // Get all currently liked albums, and foreach album...
+                foreach (Album likedAlbum in dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.LIKED_ALBUMS)) {
+                    // Get related artists to the album artist, and foreach related artist...
+                    foreach (string artist in SpotifyAPI.GetRelatedArtistIds(likedAlbum.Artist, spotifyAuthToken)) {
+                        // If the artist is already in the counted map...
+                        if (artistCount.ContainsKey(artist)) {
+                            // Add one to the artist's count.
+                            artistCount[artist]++;
+                        } else {
+                            // Otherwise, add the artist to the counted map.
+                            artistCount.Add(artist, 0);
+                        }
+                    }
+                }
+            }
 
-            // Query Database.
-            MySqlDataReader albumsResult = QueryDatabase(query);
+            return artistCount.Keys.ToList();
+        }
 
+        private void GetAlbumRecommendations(string userID, List<Album> recommendedAlbums) {
             // Get spotify authorization token.
             string authToken = SpotifyAPI.GetAccessTokenClientCredentialFlow();
 
-            SortedDictionary<string, int> artistCount = new SortedDictionary<string, int>();
-           
-            // Foreach artist...
-            while (albumsResult.Read()) {
-                // Add related artists to the counted map.
-                foreach (string artist in SpotifyAPI.GetRelatedArtistIds(albumsResult.GetString(0), authToken)) {
-                    if (artistCount.ContainsKey(artist)) {
-                        artistCount[artist]++;
-                    } else {
-                        artistCount.Add(artist, 0);
-                    }
-                } 
+            // Get all albums this user has listened to.
+            List<Album> listenedAlbums;
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                listenedAlbums = dbHandler.GetAllListenedAlbums(userID);
             }
 
+            // Get a sorted list of recommend artists.
+            List<string> recommendedArtists = GetSortedRelatedArtistsByCount(userID, authToken);
+
+            // Initialize for the next loop.
+            bool recommened;
+            List<Album> albums;
+
             // Foreach artist starting from the most recommended until there are 6 recommended albums.
-            foreach (var artistID in artistCount) {
+            for (int i = 0; recommendedAlbums.Count < 6 && i < recommendedArtists.Count; i++) {
+                // Set for this loop.
+                recommened = false;
+                albums = SpotifyAPI.GetArtistAlbums(recommendedArtists[i]);
 
-                // Foreach album...
-                foreach (var albumUri in SpotifyAPI.GetArtistAlbumURIs(artistID.Key)) {
+                // Initialize for the next loop.
+                bool listened;
 
-                    // Check if album exists in database.
-                    // Setup SQL.
-                    sql = "SELECT album_id FROM albums WHERE albumURI = @albumUri";
-                    query = new MySqlCommand(sql);
-                    query.Parameters.AddWithValue("@albumUri", albumUri);
-
-                    // If album does not exist...
-                    if (ScalarQueryDatabase(query) == null) {
-                        // Add album to database.
-                        
-                        // Add to recommended and exit to next artist.
-                        // Setup SQL.
-                        sql = "INSERT INTO recommend (user_id, album_id) VALUES (@userID, @album_id)";
-
-                        //recommendedAlbums.Add();
-                    } else {
-                        // Album exists, check if it is in this user's liked or passed albums.
-
-                        // If the album has not been listened to...
-                        if(true) {
-                            // Add to recommended and exit to next artist.
-
+                // Foreach of the artist's albums or until one has been recommended...
+                for (int j = 0; !recommened && j < albums.Count; j++) {
+                    // Set for this loop.
+                    listened = false;
+                    
+                    // Check if the user has listened to this album.
+                    for (int k = 0; !listened && k < listenedAlbums.Count; k++) {
+                        if (listenedAlbums[k].Uri.Equals(albums[j].Uri)) {
+                            listened = true;
                         }
+                    }
+
+                    // If the user has not listened to the album...
+                    if (!listened) {
+                        // Check if album exists in database.
+                        Album albumToAdd = albums[j];
+
+                        // Open database connection.
+                        using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                            try {
+                                // Try to find the album by the uri in the database.
+                                albumToAdd = dbHandler.GetAlbum(albumToAdd.Uri);
+                            } catch (Exception) {
+                                // Add the album to the database.
+                                dbHandler.InsertAlbum(albumToAdd);
+                            }
+
+                            // Add the album to recommend.
+                            dbHandler.BridgeUserAndAlbum_AlbumURI(userID, albumToAdd.Uri, ApolloDBHandler.BridgingTables.RECOMMEND);
+                            recommendedAlbums.Add(albumToAdd);
+                        }
+                        recommened = true;
                     }
                 }
             }
         }
 
         #region Login
-
         public ActionResult Login() {
             return View();
         }
 
-        public void LoginDBHandler(string loginUsername, string loginPassword) {
+        public ActionResult LoginHandler(string loginUsername, string loginPassword) {
 
-            #region Validate forms
+            // Validate forms.
             if (loginUsername.Length <= 0 || loginPassword.Length <= 0) {
                 Session[LOGIN_ERROR_SESSION] = "All forms must be filled.";
-                return;
+                return Redirect("Login");
             }
             if (loginUsername.Length > 20) {
                 Session[LOGIN_ERROR_SESSION] = "Username cannot be greater than 20 characters.";
-                return;
+                return Redirect("Login");
             }
-            #endregion
 
-            #region Login user
-            // Setup SQL.
-            string sql = "SELECT username FROM user WHERE username = @username AND password = @password";
-            MySqlCommand query = new MySqlCommand(sql);
-            query.Parameters.AddWithValue("@username", loginUsername);
-            query.Parameters.AddWithValue("@password", loginPassword);
+            // Hash the password.
+            // TODO: hash the password.
 
-            // Query Database.
-            object result = ScalarQueryDatabase(query);
-
-            // Check result.
-            if (result != null) {
-                Session[LOGGEDIN_SESSION] = result.ToString();
-            } else {
-                Session[LOGIN_ERROR_SESSION] = "Invalid username or password.";
+            // Login
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                Session[LOGGED_IN_USERID_SESSION] = dbHandler.Login(loginUsername, loginPassword);
+                Session[LOGGED_IN_USERNAME_SESSION] = loginUsername;
             }
-            #endregion
+
+            return Redirect("Discover");
         }
 
-        public void RegisterDBHandler(string regUsername, string regPassword, string regEmail) {
+        public ActionResult RegisterHandler(string regUsername, string regPassword, string regEmail) {
 
-        #region Validate forms
-                    if (regUsername.Length <= 0 || regPassword.Length <= 0 || regEmail.Length <= 0) {
-                        Session[LOGIN_ERROR_SESSION] = "All forms must be filled.";
-                        return;
-                    }
-                    if (regUsername.Length > 20) {
-                        Session[LOGIN_ERROR_SESSION] = "Username cannot be greater than 20 characters.";
-                        return;
-                    }
-                    if (regEmail.Length > 40) {
-                        Session[LOGIN_ERROR_SESSION] = "Email cannot be greater than 40 characters.";
-                        return;
-                    }
-        #endregion
+            // Validate forms.
+            if (regUsername.Length <= 0 || regPassword.Length <= 0 || regEmail.Length <= 0) {
+                Session[LOGIN_ERROR_SESSION] = "All forms must be filled.";
+                return Redirect("Login");
+            }
+            if (regUsername.Length > 20) {
+                Session[LOGIN_ERROR_SESSION] = "Username cannot be greater than 20 characters.";
+                return Redirect("Login");
+            }
+            if (regEmail.Length > 40) {
+                Session[LOGIN_ERROR_SESSION] = "Email cannot be greater than 40 characters.";
+                return Redirect("Login");
+            }
 
-        #region Check if username exists
-                    // Setup SQL.
-                    string sql = "SELECT * FROM user WHERE username = @username";
-                    MySqlCommand query = new MySqlCommand(sql);
-                    query.Parameters.AddWithValue("@username", regUsername);
-
-                    // Query Database.
-                    object result = ScalarQueryDatabase(query);
-
-                    // Check result.
-                    if (result != null) {
-                        Session[LOGIN_ERROR_SESSION] = "Username already exists.";
-                        return;
-                    }
-        #endregion
-
-        #region Create new user
-                    // Setup SQL.
-                    sql = "INSERT INTO user (username, password, email) VALUES (@username, @password, @email)";
-                    query = new MySqlCommand(sql);
-                    query.Parameters.AddWithValue("@username", regUsername);
-                    query.Parameters.AddWithValue("@password", regPassword);
-                    query.Parameters.AddWithValue("@email", regEmail);
-
-                    // Query Database.
-                    if (NonQueryDatabase(query) == -1) {
-                        Session[LOGIN_ERROR_SESSION] = "Error with registration.";
-                    } else {
-                        Session[LOGGEDIN_SESSION] = regUsername;
-                    }
-        #endregion
-        }
-
-        #endregion
-
-        #region Database
-
-        private string GetUserID(string username) {
-            // Setup SQL.
-            string sql = "SELECT user_id FROM user WHERE username = @username";
-            MySqlCommand query = new MySqlCommand(sql);
-            query.Parameters.AddWithValue("@username", username);
-
-            // Query Database.
-            object result = ScalarQueryDatabase(query);
-
-            // Check result.
-            if (result != null) {
-                return result.ToString();
-            } else {
-                throw new Exception("Unable to retrieve user_id");
+            // Check if username already exists.
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                try {
+                    // Try to get a user_id for the provided username
+                    dbHandler.GetUserID(regUsername);
+                    // If this was successful, return an error.
+                    Session[LOGIN_ERROR_SESSION] = "Username already exists.";
+                    return Redirect("Discover");
+                } catch (Exception) {
+                    // User doesn't exists, create the new user.
+                    Session[LOGGED_IN_USERID_SESSION] = dbHandler.Register(regUsername, regPassword, regEmail);
+                    Session[LOGGED_IN_USERNAME_SESSION] = regUsername;
+                    return Redirect("Login");
+                }
             }
         }
-
-        private MySqlDataReader QueryDatabase(MySqlCommand query) {
-            string connectionString = ConfigurationManager.AppSettings["DatabaseConnectionString"];
-            MySqlConnection dbConnection = new MySqlConnection(connectionString);
-            dbConnection.Open();
-
-            query.Connection = dbConnection;
-            MySqlDataReader result = query.ExecuteReader();
-            dbConnection.Close();
-
-            return result;
-        }
-
-        private object ScalarQueryDatabase(MySqlCommand query) {
-            string connectionString = ConfigurationManager.AppSettings["DatabaseConnectionString"];
-            MySqlConnection dbConnection = new MySqlConnection(connectionString);
-            dbConnection.Open();
-
-            query.Connection = dbConnection;
-            object result = query.ExecuteScalar();
-            dbConnection.Close();
-
-            return result;
-        }
-
-        private int NonQueryDatabase(MySqlCommand query) {
-            string connectionString = ConfigurationManager.AppSettings["DatabaseConnectionString"];
-            MySqlConnection dbConnection = new MySqlConnection(connectionString);
-            dbConnection.Open();
-
-            query.Connection = dbConnection;
-            int result = query.ExecuteNonQuery();
-            dbConnection.Close();
-
-            return result;
-        }
-
         #endregion
+
     }
 }

@@ -12,7 +12,7 @@
     <div id="discoverAlbumListContainer" class="screen">
 
         <!-- Check if logged in -->
-        @if (Session[ApolloController.LOGGEDIN_SESSION] == null) {
+        @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] == null) {
             <p class="h3">Sign-in or create an account to start discovering</p>
             <a href="Login" class="btn btn-danger">Register | Login</a>
         } else {

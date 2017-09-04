@@ -107,6 +107,7 @@ namespace Spurify.Controllers {
                 Dictionary<string, string> parameters = new Dictionary<string, string> {
                     { "grant_type", "client_credentials" },
                 };
+                // TODO: headers not working.
                 httpClient.DefaultRequestHeaders.Add("Authorization", Convert.ToBase64String(Encoding.ASCII.GetBytes(SPOTIFY_CLIENT_ID + ":" + SPOTIFY_CLIENT_SECRET)));
                 HttpResponseMessage response = httpClient.PostAsync(TOKEN_URI, new FormUrlEncodedContent(parameters)).Result;
                 using (JsonReader reader = new JsonTextReader(new StreamReader(response.Content.ReadAsStreamAsync().Result))) {
@@ -121,7 +122,7 @@ namespace Spurify.Controllers {
             return null;
         }
 
-        public static List<Album> GetArtistAlbumURIs(string artistID) {
+        public static List<Album> GetArtistAlbums(string artistID) {
             string url = $"https://api.spotify.com/v1/artists/{artistID}/albums?album_type=album";
             return null;
         }

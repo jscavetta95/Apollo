@@ -7,7 +7,7 @@
 
     <h1 class="h3">Login</h1>
     <br/>
-    <form id="login" class="form-horizontal" onsubmit="return validateForm(this)" action="LoginDBHandler" method="post">
+    <form id="login" class="form-horizontal" onsubmit="return validateForm(this)" action="LoginHandler" method="post">
         <div class="form-group">
             <label class="control-label col-sm-2" for="loginUsername">Username:</label>
             <input class="col-sm-10" type="text" name="loginUsername" id="loginUsername" placeholder="Username" maxlength="20" required>
@@ -27,7 +27,7 @@
 
     <h1 class="h3">Register</h1>
     <br/>
-    <form id="register" class="form-horizontal" onsubmit="return validateForm(this)" action="RegisterDBHandler" method="post">
+    <form id="register" class="form-horizontal" onsubmit="return validateForm(this)" action="RegisterHandler" method="post">
         <div class="form-group">
             <label class="control-label col-sm-2" for="regUsername">Username:</label>
             <input class="col-sm-10" type="text" name="regUsername" id="regUsername" placeholder="Username" maxlength="20" required>

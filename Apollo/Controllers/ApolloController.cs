@@ -7,7 +7,11 @@ using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-
+using SpotifyAPI.Web.Auth;
+using SpotifyAPI.Web.Enums;
+using Apollo.Models;
+using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web;
 
 namespace Apollo.Controllers {
     public class ApolloController : Controller {
@@ -59,23 +63,27 @@ namespace Apollo.Controllers {
             return recommendedAlbums;
         }
 
-        private static List<string> GetSortedRelatedArtistsByCount(string userID, string spotifyAuthToken) {
+        private static List<string> GetSortedRelatedArtistsByCount(string userID, SpotifyWebAPI spotify) {
+            
             // Initialize the counted map that will be used for related artist proportions.
             SortedDictionary<string, int> artistCount = new SortedDictionary<string, int>();
 
             // Open a connection to the database.
             using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                
                 // Get all currently liked albums, and foreach album...
-                foreach (Album likedAlbum in dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.LIKED_ALBUMS)) {
+                foreach (Album likedAlbum in dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.LIKED_ALBUMS)) {       
+
                     // Get related artists to the album artist, and foreach related artist...
-                    foreach (string artist in SpotifyAPI.GetRelatedArtistIds(likedAlbum.Artist, spotifyAuthToken)) {
+                    foreach (FullArtist artist in spotify.GetRelatedArtists(likedAlbum.Artist).Artists) {
+                        
                         // If the artist is already in the counted map...
-                        if (artistCount.ContainsKey(artist)) {
+                        if (artistCount.ContainsKey(artist.Id)) {
                             // Add one to the artist's count.
-                            artistCount[artist]++;
+                            artistCount[artist.Id]++;
                         } else {
                             // Otherwise, add the artist to the counted map.
-                            artistCount.Add(artist, 0);
+                            artistCount.Add(artist.Id, 0);
                         }
                     }
                 }
@@ -85,8 +93,20 @@ namespace Apollo.Controllers {
         }
 
         private void GetAlbumRecommendations(string userID, List<Album> recommendedAlbums) {
+            
             // Get spotify authorization token.
-            string authToken = SpotifyAPI.GetAccessTokenClientCredentialFlow();
+            ClientCredentialsAuth auth = new ClientCredentialsAuth() {
+                ClientId = SpotifyAPIModel.CLIENT_ID,
+                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
+            };
+            Token token = auth.DoAuth();
+
+            // Establish spotify connection.
+            SpotifyWebAPI spotify = new SpotifyWebAPI() {
+                TokenType = token.TokenType,
+                AccessToken = token.AccessToken,
+                UseAuth = true,
+            };
 
             // Get all albums this user has listened to.
             List<Album> listenedAlbums;
@@ -95,56 +115,56 @@ namespace Apollo.Controllers {
             }
 
             // Get a sorted list of recommend artists.
-            List<string> recommendedArtists = GetSortedRelatedArtistsByCount(userID, authToken);
+            List<string> recommendedArtists = GetSortedRelatedArtistsByCount(userID, spotify);
 
-            // Initialize for the next loop.
-            bool recommened;
-            List<Album> albums;
-
-            // Foreach artist starting from the most recommended until there are 6 recommended albums.
+            // Foreach artist starting from the most recommended until there are 6 recommended albums...
             for (int i = 0; recommendedAlbums.Count < 6 && i < recommendedArtists.Count; i++) {
-                // Set for this loop.
-                recommened = false;
-                albums = SpotifyAPI.GetArtistAlbums(recommendedArtists[i]);
 
-                // Initialize for the next loop.
-                bool listened;
-
-                // Foreach of the artist's albums or until one has been recommended...
-                for (int j = 0; !recommened && j < albums.Count; j++) {
-                    // Set for this loop.
-                    listened = false;
-                    
-                    // Check if the user has listened to this album.
-                    for (int k = 0; !listened && k < listenedAlbums.Count; k++) {
-                        if (listenedAlbums[k].Uri.Equals(albums[j].Uri)) {
-                            listened = true;
+                // Get the albums from this artist and see if any albums can be recommended.
+                Album recommenedAlbum = RecommendAnAlbum(spotify.GetArtistsAlbums(recommendedArtists[i], AlbumType.All), listenedAlbums);
+                
+                // If an album is recommened...
+                if(recommenedAlbum != null) {
+                    // Open database connection.
+                    using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                        try {
+                            // Try to find the album by the uri in the database.
+                            recommenedAlbum = dbHandler.GetAlbum(recommenedAlbum.Uri);
+                        } catch (Exception) {
+                            // Add the album to the database.
+                            dbHandler.InsertAlbum(recommenedAlbum);
                         }
-                    }
-
-                    // If the user has not listened to the album...
-                    if (!listened) {
-                        // Check if album exists in database.
-                        Album albumToAdd = albums[j];
-
-                        // Open database connection.
-                        using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
-                            try {
-                                // Try to find the album by the uri in the database.
-                                albumToAdd = dbHandler.GetAlbum(albumToAdd.Uri);
-                            } catch (Exception) {
-                                // Add the album to the database.
-                                dbHandler.InsertAlbum(albumToAdd);
-                            }
-
-                            // Add the album to recommend.
-                            dbHandler.BridgeUserAndAlbum_AlbumURI(userID, albumToAdd.Uri, ApolloDBHandler.BridgingTables.RECOMMEND);
-                            recommendedAlbums.Add(albumToAdd);
-                        }
-                        recommened = true;
+                        // Add the album to recommend.
+                        dbHandler.BridgeUserAndAlbum_AlbumURI(userID, recommenedAlbum.Uri, ApolloDBHandler.BridgingTables.RECOMMEND);
+                        recommendedAlbums.Add(recommenedAlbum);
                     }
                 }
             }
+        }
+
+        private Album RecommendAnAlbum(Paging<SimpleAlbum> albums, List<Album> listenedAlbums) {
+            // Initialize for the loop.
+            bool listened;
+
+            // Foreach of the artist's albums or until one has been recommended...
+            foreach (SimpleAlbum album in albums.Items) {
+                // Set for this iteration.
+                listened = false;
+
+                // Check if the user has listened to this album.
+                for (int i = 0; !listened && i < listenedAlbums.Count; i++) {
+                    if (listenedAlbums[i].Uri.Equals(album.Uri)) {
+                        listened = true;
+                    }
+                }
+
+                // If the user has not listened to the album...
+                if (!listened) {
+                    // Return the album.
+                    return new Album(album.Name, album.ExternalUrls["artist"], album.Uri, album.Images[0].Url);
+                }
+            }
+            return null;
         }
 
         #region Login
@@ -209,6 +229,5 @@ namespace Apollo.Controllers {
             }
         }
         #endregion
-
     }
 }

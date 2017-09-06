@@ -10,8 +10,8 @@ using System.Web;
 using System.Web.Mvc;
 
 
-namespace Apollo.Controllers {
-    public class SpotifyAPI {
+namespace Apollo.Legacy {
+    public class SpotifyAPILegacy {
 
         #region Constants
 

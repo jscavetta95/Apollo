@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using Apollo.Legacy;
 
 namespace Apollo.Controllers
 {
@@ -28,7 +29,7 @@ namespace Apollo.Controllers
         #region ActionResult Web Handlers
 
         public ActionResult Index() {
-            return View(SpotifyAPI.AUTH_URL);
+            return View(SpotifyAPILegacy.AUTH_URL);
         }
 
         public ActionResult Display() {
@@ -46,7 +47,7 @@ namespace Apollo.Controllers
         public ActionResult Login() {
             try {
                 SpotifyTokens tokens = new SpotifyTokens();
-                SpotifyAPI.GetTokens(tokens, Request.QueryString["code"]);
+                SpotifyAPILegacy.GetTokens(tokens, Request.QueryString["code"]);
                 Session[TOKENS_SESSION] = tokens;
             } catch (NotImplementedException) {
                 throw new Exception(Request.QueryString["error"]);
@@ -67,7 +68,7 @@ namespace Apollo.Controllers
             string name = string.Empty;
             bool next = false;
 
-            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPI.MakeAPICall(PLAYLISTS_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
+            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPILegacy.MakeAPICall(PLAYLISTS_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
                 while (reader.Read()) {
 
                     if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("collaborative")) {
@@ -109,7 +110,7 @@ namespace Apollo.Controllers
             bool finished = false;
 
             while (!finished) {
-                using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPI.MakeAPICall(playListTracksURI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
+                using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPILegacy.MakeAPICall(playListTracksURI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
 
                     while (!finished && reader.Read()) {
 
@@ -175,7 +176,7 @@ namespace Apollo.Controllers
             string uri = $"https://api.spotify.com/v1/users/{GetCurrentUser()}/playlists/{Session[PLAYLISTID_SESSION]}/tracks";
 
             if (!((SpotifyTokens)Session[TOKENS_SESSION]).IsAccessValid()) {
-                SpotifyAPI.RefreshTokens(((SpotifyTokens)Session[TOKENS_SESSION]));
+                SpotifyAPILegacy.RefreshTokens(((SpotifyTokens)Session[TOKENS_SESSION]));
             }
 
             using (HttpClient httpClient = new HttpClient()) {
@@ -196,7 +197,7 @@ namespace Apollo.Controllers
         private string GetCurrentUser() {
             string userID = string.Empty;
 
-            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPI.MakeAPICall(SpotifyAPI.PROFILE_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
+            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPILegacy.MakeAPICall(SpotifyAPILegacy.PROFILE_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
                 bool finished = false;
                 while (!finished && reader.Read()) {
                     if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("id")) {

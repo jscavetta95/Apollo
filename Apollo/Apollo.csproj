@@ -225,6 +225,8 @@
     <Content Include="Views\Apollo\Login.cshtml" />
     <Content Include="Views\Apollo\Discover.cshtml" />
     <Content Include="Views\Apollo\Index.cshtml" />
+    <Content Include="Views\Apollo\Albums.cshtml" />
+    <Content Include="Views\Apollo\Account.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

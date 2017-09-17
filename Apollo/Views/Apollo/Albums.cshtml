@@ -1,0 +1,59 @@
+﻿<div id="navBar">
+    <script>
+        $(function () {
+            $("#navBar").load("http://elvis.rowan.edu/~scavettaj0/Apollo/components/navBar.php");
+        });
+    </script>
+</div>
+<div id="albumMainPage" class="mainBorders body">
+    <script>
+        $.ajax({
+            url: "../components/isLoggedIn.php",
+            success: function (login) {
+                if (!login) {
+                    $("#albumMainPage").html('<p class="heading">Sign-in or create an account to view albums</p>');
+                    $("#albumMainPage").append('<a href="../login" class="button text">Register | Login</a>');
+                }
+            },
+            type: "GET"
+        });
+    </script>
+    <form id="albumsForm" action="removeAlbum.php" method="post">
+        <label for="likedAlbums" class="heading">Liked Albums</label>
+        <label for="passedAlbums" class="heading">Passed Albums</label>
+        <br>
+        <select multiple id="likedAlbums" class="albumForm text" name="likedAlbums[]">
+            <?php
+            session_start();
+            include "../components/dbHandler.php";
+            $likedAlbums = getLikedAlbumNames($_SESSION['username']);
+            $html = "";
+            if($likedAlbums[0] != "") {
+            foreach($likedAlbums as $row) {
+            $html .="
+            <option>".$row['albumName']."</option>";
+            }
+            }
+            echo $html;
+            ?>
+        </select>
+        <select multiple id="passedAlbums" class="albumForm text" name="passedAlbums[]">
+            <?php
+            $passedAlbums = getPassedAlbumNames($_SESSION['username']);
+            $html = "";
+            if($passedAlbums[0] != "") {
+            foreach($passedAlbums as $row) {
+            $html .="
+            <option>".$row['albumName']."</option>";
+            }
+            }
+            echo $html;
+            ?>
+        </select><br><br>
+        <input type="submit" id="removeAlbumsSubmit" class="submit" value="Remove Albums" />
+    </form>
+    <form id="addSeedForm" action="../components/handleAlbumSearch.php" method="get">
+        <input type="text" class="text" name="album_search_text" id="album_search_text" placeholder="Input Album Name" maxlength="100" required />
+        <br /><br /><input type="submit" id="addAlbumSeedSubmit" class="submit" value="Add Album Seed" />
+    </form>
+</div>

@@ -82,7 +82,7 @@ namespace Apollo.Controllers {
                             // Add one to the artist's count.
                             artistCount[artist.Id]++;
                         } else {
-                            // Otherwise, add the artist to the counted map.
+                            // Otherwise, add the artist to the counted map. //TODO: Change 0 to 1
                             artistCount.Add(artist.Id, 0);
                         }
                     }
@@ -117,11 +117,23 @@ namespace Apollo.Controllers {
             // Get a sorted list of recommend artists.
             List<string> recommendedArtists = GetSortedRelatedArtistsByCount(userID, spotify);
 
+            // Initialize a list of albums.
+            Paging<SimpleAlbum> albumsPaging;
+            List<FullAlbum> albums = new List<FullAlbum>();
+
             // Foreach artist starting from the most recommended until there are 6 recommended albums...
             for (int i = 0; recommendedAlbums.Count < 6 && i < recommendedArtists.Count; i++) {
+                albums.Clear();
+                // Get all of the albums from this artist.
+                albumsPaging = spotify.GetArtistsAlbums(recommendedArtists[i], AlbumType.All);
+                albumsPaging.Items.ForEach(album => albums.Add(spotify.GetAlbum(album.Id)));
+                while (albumsPaging.HasNextPage()) {
+                    albumsPaging = spotify.GetNextPage(albumsPaging);
+                    albumsPaging.Items.ForEach(album => albums.Add(spotify.GetAlbum(album.Id)));
+                }
 
-                // Get the albums from this artist and see if any albums can be recommended.
-                Album recommenedAlbum = RecommendAnAlbum(spotify.GetArtistsAlbums(recommendedArtists[i], AlbumType.All), listenedAlbums);
+                // See if any albums can be recommended.
+                Album recommenedAlbum = RecommendAnAlbum(albums, listenedAlbums);
                 
                 // If an album is recommened...
                 if(recommenedAlbum != null) {
@@ -142,12 +154,12 @@ namespace Apollo.Controllers {
             }
         }
 
-        private Album RecommendAnAlbum(Paging<SimpleAlbum> albums, List<Album> listenedAlbums) {
+        private Album RecommendAnAlbum(List<FullAlbum> albums, List<Album> listenedAlbums) {
             // Initialize for the loop.
             bool listened;
 
             // Foreach of the artist's albums or until one has been recommended...
-            foreach (SimpleAlbum album in albums.Items) {
+            foreach (FullAlbum album in albums) {
                 // Set for this iteration.
                 listened = false;
 
@@ -161,7 +173,7 @@ namespace Apollo.Controllers {
                 // If the user has not listened to the album...
                 if (!listened) {
                     // Return the album.
-                    return new Album(album.Name, album.ExternalUrls["artist"], album.Uri, album.Images[0].Url);
+                    return new Album(album.Name, album.Artists[0].Id, album.Uri, album.Images[0].Url);
                 }
             }
             return null;

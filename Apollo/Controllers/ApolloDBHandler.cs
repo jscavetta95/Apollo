@@ -185,6 +185,11 @@ namespace Apollo.Controllers {
             // Query database.
             MySqlDataReader result = query.ExecuteReader();
 
+            if(!result.Read()) {
+                result.Close();
+                throw new ArgumentException("Cannot find album in database");
+            }
+
             // Create the album model and return.
             return new Album(result.GetString(0), result.GetString(1), result.GetString(2), result.GetString(3));
         }
@@ -197,9 +202,12 @@ namespace Apollo.Controllers {
         public List<Album> GetAllListenedAlbums(string userID) {
             // Setup SQL query.
             string sql = $"SELECT albumName, albumArtist, albumURI, albumImageLink FROM albums " +
-                         $"JOIN {BridgingTables.LIKED_ALBUMS.ToString().ToLower()} USING (album_id) " +
-                         $"JOIN {BridgingTables.PASSED_ALBUMS.ToString().ToLower()} USING (album_id) " +
-                         $"WHERE user_id = @userID";
+                         $"LEFT JOIN {BridgingTables.LIKED_ALBUMS.ToString().ToLower()} USING (album_id) " +
+                         $"LEFT JOIN {BridgingTables.PASSED_ALBUMS.ToString().ToLower()} USING (album_id) " +
+                         $"LEFT JOIN {BridgingTables.RECOMMEND.ToString().ToLower()} USING (album_id) " +
+                         $"WHERE {BridgingTables.LIKED_ALBUMS.ToString().ToLower()}.user_id = @userID " +
+                         $"OR {BridgingTables.PASSED_ALBUMS.ToString().ToLower()}.user_id = @userID " +
+                         $"OR {BridgingTables.RECOMMEND.ToString().ToLower()}.user_id = @userID ";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
             query.Parameters.AddWithValue("@userID", userID);
 

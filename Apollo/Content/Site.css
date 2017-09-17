@@ -74,3 +74,25 @@ td {
     font-size: 15px !important;
 }
 
+.btn-discover {
+    width: 45%;
+    margin: 10px 2px;
+}
+
+.text-title {
+    font-size: medium;
+}
+
+.panel-default {
+    margin: 14px 0px;
+    height: 320px;
+    width: 200px;
+}
+
+    .panel-default > .panel-heading {
+        min-height: 22%;
+    }
+
+    .panel-default > .panel-body {
+        min-height: 78%;
+    }

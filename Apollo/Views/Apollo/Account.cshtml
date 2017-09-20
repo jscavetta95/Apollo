@@ -1,0 +1,19 @@
+﻿@model Apollo.Models.Apollo.User
+@{
+    ViewBag.Title = "Account";
+}
+
+<h4>@Model.Username</h4>
+<h4>@Model.Email</h4>
+
+<h3>Change Email</h3>
+<div class="form-group">
+    <input type="email" name="new-email" class="form-control" placeholder="new email" style="float: left"/>
+    <input type="submit" class="btn btn-info"/> 
+</div>
+
+<h3>Change Password</h3>
+<div class="form-group">
+    <input type="password" name="new-pass" class="form-control" placeholder="new email" style="float: left"/>
+    <input type="submit" class="btn btn-info" />
+</div>

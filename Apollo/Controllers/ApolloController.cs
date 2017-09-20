@@ -36,8 +36,7 @@ namespace Apollo.Controllers {
 
             return View(GetRecommenedAlbums());
         }
-        #endregion
-
+        
         /// <summary>
         /// Gets the recommened albums.
         /// </summary>
@@ -178,6 +177,7 @@ namespace Apollo.Controllers {
             }
             return null;
         }
+        #endregion
 
         #region Login
         public ActionResult Login() {
@@ -238,6 +238,21 @@ namespace Apollo.Controllers {
                     Session[LOGGED_IN_USERNAME_SESSION] = regUsername;
                     return Redirect("Login");
                 }
+            }
+        }
+        #endregion
+
+        #region Account
+        public ActionResult Account() {
+            if (Session[LOGGED_IN_USERNAME_SESSION] == null) {
+                return Redirect("Login");
+            } else {
+                string email;
+                using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                    email = dbHandler.GetEmail(Session[LOGGED_IN_USERID_SESSION] as string);
+                }
+
+                return View(new User() { Username = Session[LOGGED_IN_USERNAME_SESSION] as string, Email = email });
             }
         }
         #endregion

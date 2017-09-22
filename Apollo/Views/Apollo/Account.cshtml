@@ -8,12 +8,57 @@
 
 <h3>Change Email</h3>
 <div class="form-group">
-    <input type="email" name="new-email" class="form-control" placeholder="new email" style="float: left"/>
-    <input type="submit" class="btn btn-info"/> 
+    <input id="emailInput" type="email" name="new-email" class="form-control" placeholder="new email" style="float: left"/>
+    <input id="emailSubmit" type="submit" class="btn btn-info"/> 
 </div>
 
 <h3>Change Password</h3>
 <div class="form-group">
-    <input type="password" name="new-pass" class="form-control" placeholder="new email" style="float: left"/>
-    <input type="submit" class="btn btn-info" />
+    <input id="oldPassInput" type="password" name="old-pass" class="form-control" placeholder="old password" style="float: left"/>
+    <input id="newPassInput" type="password" name="new-pass" class="form-control" placeholder="new password" style="float: left"/>
+    <input id="passwordSubmit" type="submit" class="btn btn-info" />
 </div>
+
+<div id="status" class="text-info">
+
+</div>
+
+<script>
+    $("#emailSubmit").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ChangeEmail", "ApolloController")",
+            data: { newEmail: $("#emailInput").text },
+            dataType: 'json',
+            success: {
+                function(data) {
+                    $("#status").html("<p>Email changed succesfully.</p>");
+                }
+            },
+            error: {
+                function(data) {
+                    $("#status").html("<p>Error changing email.</p>");
+                }
+            }
+        });
+    });
+
+    $("#passwordSubmit").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ChangePassword", "ApolloController")",
+            data: { newEmail: $("#emailInput").text },
+            dataType: 'json',
+            success: {
+                function(data) {
+                    $("#status").html("<p>Password changed succesfully.</p>");
+                }
+            },
+            error: {
+                function(data) {
+                    $("#status").html("<p>Error changing password.</p>");
+                }
+            }
+        });
+    });
+</script>

@@ -244,6 +244,33 @@ namespace Apollo.Controllers {
             // Create the album model and return.
             return result;
         }
+
+        public bool ChangePassword(string userID, string oldPass, string newPass) {
+            // Setup SQL query.
+            string sql = "UPDATE user SET password = @newPass WHERE user_id = @userID AND password = @oldPass";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+            query.Parameters.AddWithValue("@newPass", newPass);
+            query.Parameters.AddWithValue("@oldPass", oldPass);
+
+            // Query database.
+            int result = query.ExecuteNonQuery();
+
+            return result == 0;
+        }
+
+        public bool ChangeEmail(string userID, string newEmail) {
+            // Setup SQL query.
+            string sql = "UPDATE user SET email = @newEmail WHERE user_id = @userID";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+            query.Parameters.AddWithValue("@newEmail", newEmail);
+
+            // Query database.
+            int result = query.ExecuteNonQuery();
+
+            return result == 0;
+        }
         #endregion
 
         #region IDisposable        

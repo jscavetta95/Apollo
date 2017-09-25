@@ -23,42 +23,50 @@
 
 </div>
 
-<script>
-    $("#emailSubmit").click(function () {
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("ChangeEmail", "ApolloController")",
-            data: { newEmail: $("#emailInput").text },
-            dataType: 'json',
-            success: {
-                function(data) {
-                    $("#status").html("<p>Email changed succesfully.</p>");
-                }
-            },
-            error: {
-                function(data) {
-                    $("#status").html("<p>Error changing email.</p>");
-                }
-            }
-        });
-    });
+@section scripts {
+    <script>
+        $(function () {
+            $("#emailSubmit").on("click", function () {
+                var email = $("#emailInput").val();
+                debugger;
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("ChangeEmail", "ApolloController")",
+                    data: { newEmail: email},
+                    dataType: 'json',
+                    success: {
+                        function(data) {
+                            debugger;
+                            $("#status").html("<p>Email changed succesfully.</p>");
+                        }
+                    },
+                    error: {
+                        function(data) {
+                            debugger;
+                            $("#status").html("<p>Error changing email.</p>");
+                        }
+                    }
+                });
+            }),
 
-    $("#passwordSubmit").click(function () {
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("ChangePassword", "ApolloController")",
-            data: { newEmail: $("#emailInput").text },
-            dataType: 'json',
-            success: {
-                function(data) {
-                    $("#status").html("<p>Password changed succesfully.</p>");
-                }
-            },
-            error: {
-                function(data) {
-                    $("#status").html("<p>Error changing password.</p>");
-                }
-            }
+            $("#passwordSubmit").on("click", function () {
+                $.ajax({
+                    type: "POST",
+                        url: "@Url.Action("ChangePassword", "ApolloController")",
+                        data: { oldPass: $("#oldPassInput").text, newPass: $("#newPassInput").text },
+                        dataType: 'json',
+                        success: {
+                            function(data) {
+                                $("#status").html("<p>Password changed succesfully.</p>");
+                            }
+                        },
+                        error: {
+                            function(data) {
+                                $("#status").html("<p>Error changing password.</p>");
+                            }
+                        }
+                });
+            });
         });
-    });
-</script>
+    </script>
+}

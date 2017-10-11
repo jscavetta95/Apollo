@@ -256,7 +256,7 @@ namespace Apollo.Controllers {
             // Query database.
             int result = query.ExecuteNonQuery();
 
-            return result == 0;
+            return result == 1;
         }
 
         public bool ChangeEmail(string userID, string newEmail) {
@@ -269,7 +269,7 @@ namespace Apollo.Controllers {
             // Query database.
             int result = query.ExecuteNonQuery();
 
-            return result == 0;
+            return result == 1;
         }
         #endregion
 

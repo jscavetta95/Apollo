@@ -36,7 +36,24 @@ namespace Apollo.Controllers {
 
             return View(GetRecommenedAlbums());
         }
-        
+
+        public ActionResult ProcessAlbum(string albumURI, bool like)
+        {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                if(like)
+                {
+                    dbHandler.BridgeUserAndAlbum_AlbumURI(Session[LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
+                }
+                else
+                {
+                    dbHandler.BridgeUserAndAlbum_AlbumURI(Session[LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.PASSED_ALBUMS);
+                }
+            }
+
+            return Redirect("Discover");
+        }
+
         /// <summary>
         /// Gets the recommened albums.
         /// </summary>
@@ -124,7 +141,7 @@ namespace Apollo.Controllers {
             for (int i = 0; recommendedAlbums.Count < 6 && i < recommendedArtists.Count; i++) {
                 albums.Clear();
                 // Get all of the albums from this artist.
-                albumsPaging = spotify.GetArtistsAlbums(recommendedArtists[i], AlbumType.All);
+                albumsPaging = spotify.GetArtistsAlbums(recommendedArtists[i], AlbumType.All, market: "US");
                 albumsPaging.Items.ForEach(album => albums.Add(spotify.GetAlbum(album.Id)));
                 while (albumsPaging.HasNextPage()) {
                     albumsPaging = spotify.GetNextPage(albumsPaging);
@@ -262,7 +279,6 @@ namespace Apollo.Controllers {
                 if(dbHandler.ChangePassword(Session[LOGGED_IN_USERID_SESSION] as string, oldPass, newPass)) {
                     return true;
                 } else {
-                    Session[ERROR_SESSION] = "Invalid Password.";
                     return false;
                 }
             }
@@ -274,10 +290,15 @@ namespace Apollo.Controllers {
                 if (dbHandler.ChangeEmail(Session[LOGGED_IN_USERID_SESSION] as string, newEmail)) {
                     return true;
                 } else {
-                    Session[ERROR_SESSION] = "Unable to change email.";
                     return false;
                 }
             }
+        }
+
+        public ActionResult Logout()
+        {
+            Session.Abandon();
+            return Redirect("Index");
         }
         #endregion
     }

@@ -8,15 +8,15 @@
     @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] != null) {
         <div class="panel panel-primary text-center">
             <h3 class="panel-heading">Welcome back, start discovering now</h3>
-            <a class="panel-body btn btn-primary" href="Discover">Discover</a>
+            @Html.ActionLink("Discover", "Discover", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
             <br /><br />
-            <h1 class="panel-heading">Listen to liked albums and add new album seeds</h1>
-            <a class="panel-body btn btn-primary" href="Albums">Albums</a>
+            <h3 class="panel-heading">Listen to liked albums and add new album seeds</h3>
+            @Html.ActionLink("Albums", "Albums", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
         </div>
     } else {
         <div class="panel panel-primary text-center">
             <h3 class="panel-heading">Welcome to Apollo, register or log in to start discovering new music</h3>
-            <a class="panel-body btn btn-primary" href="Login">Register | Login</a>
+            @Html.ActionLink("Register | Login", "Login", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
         </div>
     }
 

@@ -18,8 +18,8 @@
                 <div class="panel-body">
                     <img class="albumImgSelect img-responsive img-rounded" src="@album.ImageLink" alt="Album Image" name="@album.Uri">
                     <div class="text-center">
-                        <button id="likeButton" class="btn btn-primary btn-discover" name="@album.Uri">Like</button>
-                        <button id="passButton" class="btn btn-danger btn-discover" name="@album.Uri">Pass</button>
+                        @Html.ActionLink("Like", "ProcessAlbum", "Apollo", new { albumURI = album.Uri, like = true }, new { @class = "btn btn-primary btn-discover", @name = album.Uri })
+                        @Html.ActionLink("Pass", "ProcessAlbum", "Apollo", new { albumURI = album.Uri, like = false }, new { @class = "btn btn-danger btn-discover", @name = album.Uri })
                     </div>
                 </div>
             </div>
@@ -31,11 +31,10 @@
     <script>
         $(function () {
             $('button').on("click", function () {
-                $('button').off("click");
+                this.off("click");
                 $.ajax({
                     type: "POST",
-                    async: false,
-                    url: '../components/discoverButtonPress.php',
+                    url: "@Url.Action("ChangeEmail", "Apollo")",
                     dataType: 'json',
                     data:
                     {

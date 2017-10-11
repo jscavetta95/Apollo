@@ -49,8 +49,8 @@
     </form>
 
     <div id="login_register_errorMessage" class="panel-danger">
-        @if(Session[ApolloController.LOGIN_ERROR_SESSION] != null) {
-            Session[ApolloController.LOGIN_ERROR_SESSION].ToString();
+        @if(Session[ApolloController.ERROR_SESSION] != null) {
+            Session[ApolloController.ERROR_SESSION].ToString();
         }
     </div>
 </div>

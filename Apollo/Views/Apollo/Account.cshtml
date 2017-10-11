@@ -1,50 +1,72 @@
-﻿
+﻿@model Apollo.Models.Apollo.User
+@{
+    ViewBag.Title = "Account";
+}
 
-<div id="accountMainPage" class="mainBorders body">
-    <p class="heading">
-        @Model
-    </p>
-    <p class="heading">
-        Email: <?php
-        include "../components/dbHandler.php";
-        echo getEmail($_SESSION['username']);
-        ?>
-    </p>
-    <h1 class="heading">Change Password</h1>
-    <form id="changePassword" onsubmit="return validatePassword(this)" action="changePassword.php" method="post">
-        <label for="change_password" class="text">Enter new password</label><br>
-        <input type="password" name="change_password" id="change_password" placeholder="Input New Password" required><br><br>
-        <label for="change_password_validate" class="text">Re-enter new password</label><br>
-        <input type="password" name="change_password_validate" id="change_password_validate" placeholder="Repeat Password" required><br><br>
-        <input type="submit" value="Change Password" class="submit">
-    </form>
-    <div id="change_password_message">
-        <p>
-            <?php
-            if(isset($_SESSION['change_password_message'])){
-            echo $_SESSION['change_password_message'];
-            $_SESSION['change_password_message'] = null;
-            }
-            ?>
-        </p>
-    </div>
-    <h1 class="heading">Change Email</h1>
-    <form id="changeEmail" onsubmit="return validateForm(this)" action="changeEmail.php" method="post">
-        <label for="change_email" class="text">Enter new email</label><br>
-        <input type="email" name="change_email" id="change_email" placeholder="Input New Email" maxlength="40" required><br><br>
-        <input type="submit" value="Change Email" class="submit">
-    </form>
-    <div id="change_email_message">
-        <p>
-            <?php
-            if(isset($_SESSION['change_email_message'])){
-            echo $_SESSION['change_email_message'];
-            $_SESSION['change_email_message'] = null;
-            }
-            ?>
-        </p>
-    </div>
-    <form id="logoutForm" action="logout.php" method="post">
-        <input type="submit" id="logout_button" value="Logout" class="submit">
-    </form>
+<h4>@Model.Username</h4>
+<h4>@Model.Email</h4>
+
+<h3>Change Email</h3>
+<div class="form-group">
+    <input id="emailInput" type="email" name="new-email" class="form-control" placeholder="new email" style="float: left"/>
+    <input id="emailSubmit" type="submit" class="btn btn-info"/> 
 </div>
+
+<h3>Change Password</h3>
+<div class="form-group">
+    <input id="oldPassInput" type="password" name="old-pass" class="form-control" placeholder="old password" style="float: left"/>
+    <input id="newPassInput" type="password" name="new-pass" class="form-control" placeholder="new password" style="float: left"/>
+    <input id="passwordSubmit" type="submit" class="btn btn-info" />
+</div>
+
+<div id="status" class="text-info">
+
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $("#emailSubmit").on("click", function () {
+                var email = $("#emailInput").val();
+                debugger;
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("ChangeEmail", "ApolloController")",
+                    data: { newEmail: email},
+                    dataType: 'json',
+                    success: {
+                        function(data) {
+                            debugger;
+                            $("#status").html("<p>Email changed succesfully.</p>");
+                        }
+                    },
+                    error: {
+                        function(data) {
+                            debugger;
+                            $("#status").html("<p>Error changing email.</p>");
+                        }
+                    }
+                });
+            }),
+
+            $("#passwordSubmit").on("click", function () {
+                $.ajax({
+                    type: "POST",
+                        url: "@Url.Action("ChangePassword", "ApolloController")",
+                        data: { oldPass: $("#oldPassInput").text, newPass: $("#newPassInput").text },
+                        dataType: 'json',
+                        success: {
+                            function(data) {
+                                $("#status").html("<p>Password changed succesfully.</p>");
+                            }
+                        },
+                        error: {
+                            function(data) {
+                                $("#status").html("<p>Error changing password.</p>");
+                            }
+                        }
+                });
+            });
+        });
+    </script>
+}

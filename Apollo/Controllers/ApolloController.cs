@@ -19,7 +19,7 @@ namespace Apollo.Controllers {
         #region Constants
         public const string LOGGED_IN_USERNAME_SESSION = "LoggedInUsername";
         public const string LOGGED_IN_USERID_SESSION = "LoggedInUserID";
-        public const string LOGIN_ERROR_SESSION = "LoginError";
+        public const string ERROR_SESSION = "LoginError";
         #endregion
 
         #region Index
@@ -36,8 +36,7 @@ namespace Apollo.Controllers {
 
             return View(GetRecommenedAlbums());
         }
-        #endregion
-
+        
         /// <summary>
         /// Gets the recommened albums.
         /// </summary>
@@ -178,6 +177,7 @@ namespace Apollo.Controllers {
             }
             return null;
         }
+        #endregion
 
         #region Login
         public ActionResult Login() {
@@ -188,11 +188,11 @@ namespace Apollo.Controllers {
 
             // Validate forms.
             if (loginUsername.Length <= 0 || loginPassword.Length <= 0) {
-                Session[LOGIN_ERROR_SESSION] = "All forms must be filled.";
+                Session[ERROR_SESSION] = "All forms must be filled.";
                 return Redirect("Login");
             }
             if (loginUsername.Length > 20) {
-                Session[LOGIN_ERROR_SESSION] = "Username cannot be greater than 20 characters.";
+                Session[ERROR_SESSION] = "Username cannot be greater than 20 characters.";
                 return Redirect("Login");
             }
 
@@ -212,15 +212,15 @@ namespace Apollo.Controllers {
 
             // Validate forms.
             if (regUsername.Length <= 0 || regPassword.Length <= 0 || regEmail.Length <= 0) {
-                Session[LOGIN_ERROR_SESSION] = "All forms must be filled.";
+                Session[ERROR_SESSION] = "All forms must be filled.";
                 return Redirect("Login");
             }
             if (regUsername.Length > 20) {
-                Session[LOGIN_ERROR_SESSION] = "Username cannot be greater than 20 characters.";
+                Session[ERROR_SESSION] = "Username cannot be greater than 20 characters.";
                 return Redirect("Login");
             }
             if (regEmail.Length > 40) {
-                Session[LOGIN_ERROR_SESSION] = "Email cannot be greater than 40 characters.";
+                Session[ERROR_SESSION] = "Email cannot be greater than 40 characters.";
                 return Redirect("Login");
             }
 
@@ -230,13 +230,52 @@ namespace Apollo.Controllers {
                     // Try to get a user_id for the provided username
                     dbHandler.GetUserID(regUsername);
                     // If this was successful, return an error.
-                    Session[LOGIN_ERROR_SESSION] = "Username already exists.";
+                    Session[ERROR_SESSION] = "Username already exists.";
                     return Redirect("Discover");
                 } catch (Exception) {
                     // User doesn't exists, create the new user.
                     Session[LOGGED_IN_USERID_SESSION] = dbHandler.Register(regUsername, regPassword, regEmail);
                     Session[LOGGED_IN_USERNAME_SESSION] = regUsername;
                     return Redirect("Login");
+                }
+            }
+        }
+        #endregion
+
+        #region Account
+        public ActionResult Account() {
+            if (Session[LOGGED_IN_USERNAME_SESSION] == null) {
+                return Redirect("Login");
+            } else {
+                string email;
+                using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                    email = dbHandler.GetEmail(Session[LOGGED_IN_USERID_SESSION] as string);
+                }
+
+                return View(new User() { Username = Session[LOGGED_IN_USERNAME_SESSION] as string, Email = email });
+            }
+        }
+
+        public bool ChangePassword(string oldPass, string newPass) {
+            //TODO: Hash password
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                if(dbHandler.ChangePassword(Session[LOGGED_IN_USERID_SESSION] as string, oldPass, newPass)) {
+                    return true;
+                } else {
+                    Session[ERROR_SESSION] = "Invalid Password.";
+                    return false;
+                }
+            }
+        }
+
+        public bool ChangeEmail(string newEmail) {
+            //TODO: Hash password
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
+                if (dbHandler.ChangeEmail(Session[LOGGED_IN_USERID_SESSION] as string, newEmail)) {
+                    return true;
+                } else {
+                    Session[ERROR_SESSION] = "Unable to change email.";
+                    return false;
                 }
             }
         }

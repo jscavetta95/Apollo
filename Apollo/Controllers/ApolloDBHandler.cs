@@ -223,6 +223,54 @@ namespace Apollo.Controllers {
             return albums;
         }
 
+        /// <summary>
+        /// Gets the email associated with the userID.
+        /// </summary>
+        /// <param name="userID">The user identifier.</param>
+        /// <returns>The email associated with the user identifier.</returns>
+        public string GetEmail(string userID) {
+            // Setup SQL query.
+            string sql = "SELECT email FROM user WHERE user_id = @userID";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+
+            // Query database.
+            string result = query.ExecuteScalar() as string;
+
+            if (result == null) {
+                throw new ArgumentException("Cannot find email from user_id");
+            }
+
+            // Create the album model and return.
+            return result;
+        }
+
+        public bool ChangePassword(string userID, string oldPass, string newPass) {
+            // Setup SQL query.
+            string sql = "UPDATE user SET password = @newPass WHERE user_id = @userID AND password = @oldPass";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+            query.Parameters.AddWithValue("@newPass", newPass);
+            query.Parameters.AddWithValue("@oldPass", oldPass);
+
+            // Query database.
+            int result = query.ExecuteNonQuery();
+
+            return result == 0;
+        }
+
+        public bool ChangeEmail(string userID, string newEmail) {
+            // Setup SQL query.
+            string sql = "UPDATE user SET email = @newEmail WHERE user_id = @userID";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+            query.Parameters.AddWithValue("@newEmail", newEmail);
+
+            // Query database.
+            int result = query.ExecuteNonQuery();
+
+            return result == 0;
+        }
         #endregion
 
         #region IDisposable        

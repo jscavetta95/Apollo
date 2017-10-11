@@ -25,6 +25,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -161,6 +162,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Apollo\Album.cs" />
+    <Compile Include="Models\Apollo\User.cs" />
     <Compile Include="Models\SpotifyAPIModel.cs" />
     <Compile Include="Models\Spurify\Playlist.cs" />
     <Compile Include="Models\Spurify\SpurifyViewModel.cs" />
@@ -225,7 +227,6 @@
     <Content Include="Views\Apollo\Login.cshtml" />
     <Content Include="Views\Apollo\Discover.cshtml" />
     <Content Include="Views\Apollo\Index.cshtml" />
-    <Content Include="Views\Apollo\Albums.cshtml" />
     <Content Include="Views\Apollo\Account.cshtml" />
   </ItemGroup>
   <ItemGroup>

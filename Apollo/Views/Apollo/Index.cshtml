@@ -7,21 +7,21 @@
 
     @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] != null) {
         <div class="panel panel-primary text-center">
-            <h3 class="panel-heading">Welcome back, start discovering now</h3>
+            <h3 class="panel-heading">Welcome back, start discovering now.</h3>
             @Html.ActionLink("Discover", "Discover", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
             <br /><br />
-            <h3 class="panel-heading">Listen to liked albums and add new album seeds</h3>
+            <h3 class="panel-heading">Listen to liked albums and add new album seeds.</h3>
             @Html.ActionLink("Albums", "Albums", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
         </div>
     } else {
         <div class="panel panel-primary text-center">
-            <h3 class="panel-heading">Welcome to Apollo, register or log in to start discovering new music</h3>
+            <h3 class="panel-heading">Welcome to Apollo. Register or login to start discovering new music.</h3>
             @Html.ActionLink("Register | Login", "Login", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
         </div>
     }
 
     <div id="aboutContainer" class="panel panel-info text-center">
-        <h4 class="panel-heading">What is Apollo</h4>
+        <h3 class="panel-heading">What is Apollo</h3>
         <p class="panel-body">
             Apollo is a simple music discovery tool that utilizes the Spotify API. Apollo allows for users to discover
             new albums through an initial album seed, which is used to populate a list of albums from artists similar to
@@ -30,11 +30,11 @@
             broader as similar artists to the liked album's artists are acquired.
             <br /><br />
             All music provided is courtesy of Spotify's collection. For more information on the Spotify API, see
-            <a href="https://developer.spotify.com/web-api/">https://developer.spotify.com/web-api/</a>
+            <a href="https://developer.spotify.com/web-api/" target="_blank">https://developer.spotify.com/web-api/</a>
         </p>
         <br />
         <p class="authorInfo panel-body">
-            Designed and Developed by: <a href="http://elvis.rowan.edu/~scavettaj0/me/"> Joseph Scavetta</a> <br>
+            Designed and Developed by: <a href="http://josephscavetta.tk/" target="_blank"> Joseph Scavetta</a> <br>
             Contact Email: <a href="mailto:jscavetta95@gmail.com?Subject=Apollo" target="_top">jscavetta95@gmail.com</a>
         </p>
     </div>

@@ -5,8 +5,11 @@
 
 /* Set padding to keep content from hitting the edges */
 .body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 0;
+    padding-right: 0;
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 /* Override the default bootstrap behavior where horizontal description lists 
@@ -24,19 +27,24 @@ textarea {
 }
 
 .panel-primary {
-    background-color: #FFFFFF;
+    background-color: #d4e0ea;
 }
     .panel-primary > .panel-heading {
-        background-color: #1ED760;
-        border-color: #1ED760;
+        background-color: #6dbb89;
+        border: none;
         font-family: Circular, Helvetica, Arial, sans-serif;
     }
 
-.btn-primary, 
-.btn-primary.active, 
+.btn {
+    font-size: medium;
+}
+
+.btn-primary,
+.btn-primary.active,
 .btn-primary.disabled {
-    background-color: #1ED760;
-    border-color: #1ED760;
+    background-color: #6dbb89;
+    border-radius: 20px;
+    border: none;
 }
     .btn-primary:hover {
         background-color: #17bf53;
@@ -51,11 +59,16 @@ textarea {
     background-color: #1ED760;
 }
 
+.panel {
+    border: none;
+    margin: 0;
+    padding: 20px 0;
+}
+
 .panel-info {
     background-color: #ECEBE8;
     color: #343232;
     font-size: 16px;
-    padding: 10px 25px;
 }
     .panel-info > .btn-collapse {
         background-color: #ECEBE8;
@@ -96,3 +109,29 @@ td {
     .panel-default > .panel-body {
         min-height: 78%;
     }
+
+footer {
+    background-color: #e0e0e0;
+}
+
+#login {
+    background-color: #cee5d6;
+    margin: 0;
+    padding: 35px;
+}
+
+#register {
+    background-color: #cedbe5;
+    margin: 0;
+    padding: 35px;
+}
+
+.container {
+    width: 100%;
+    margin: 0;
+    padding: 5px;
+}
+
+#discoverAlbumListContainer {
+    max-width: 35%;
+}

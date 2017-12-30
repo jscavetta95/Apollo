@@ -6,12 +6,12 @@
 }
 
 <div class="container">
-    <div id="spotifyPlayerContainer" class="text-center col-sm-6 col-md-5 col-lg-4">
+    <div id="spotifyPlayerContainer" class="text-center col-sm-5">
         <!-- NOTE: uri will have to be dynamically created to change the album on the widget -->
         <iframe style="height: 70vh" id="spotifyPlayer" src="" frameborder="1"></iframe>
     </div>
 
-    <div id="discoverAlbumListContainer" class="text-center screen col-sm-6 col-md-7 col-lg-8 row">
+    <div id="discoverAlbumListContainer" class="text-center screen col-sm-7 row">
         @foreach (Album album in Model) {
             <div class="panel panel-default col-sm-4">
                 <div class="panel-heading text-title text-center">@album.Name</div>

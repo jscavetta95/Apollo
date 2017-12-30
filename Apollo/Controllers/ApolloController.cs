@@ -98,8 +98,8 @@ namespace Apollo.Controllers {
                             // Add one to the artist's count.
                             artistCount[artist.Id]++;
                         } else {
-                            // Otherwise, add the artist to the counted map. //TODO: Change 0 to 1
-                            artistCount.Add(artist.Id, 0);
+                            // Otherwise, add the artist to the counted map.
+                            artistCount.Add(artist.Id, 1);
                         }
                     }
                 }

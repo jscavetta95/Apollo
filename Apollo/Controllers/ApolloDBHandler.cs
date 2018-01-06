@@ -109,6 +109,12 @@ namespace Apollo.Controllers {
             query.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Gets all albums from one of the bridging tables.
+        /// </summary>
+        /// <param name="userID">The user identifier.</param>
+        /// <param name="table">The bridging table.</param>
+        /// <returns></returns>
         public List<Album> GetAlbumsFromBridge(string userID, BridgingTables table) {
             // Setup SQL query.
             string sql = $"SELECT albumName, albumArtist, albumURI, albumImageLink FROM albums JOIN {table.ToString().ToLower()} USING (album_id) WHERE user_id = @userID";
@@ -116,15 +122,36 @@ namespace Apollo.Controllers {
             query.Parameters.AddWithValue("@userID", userID);
 
             // Query Database.
-            MySqlDataReader results = query.ExecuteReader();
-
-            // Read results into List of Albums.
-            List<Album> albums = new List<Album>();
-            while (results.Read()) {
-                albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
+            using (MySqlDataReader results = query.ExecuteReader())
+            {
+                // Read results into List of Albums.
+                List<Album> albums = new List<Album>();
+                while (results.Read())
+                {
+                    albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
+                }
+                return albums;
             }
+        }
 
-            return albums;
+        public List<Album> GetAlbumsFromBridge(string userID, BridgingTables table, int limit, int offset)
+        {
+            // Setup SQL query.
+            string sql = $"SELECT albumName, albumArtist, albumURI, albumImageLink FROM albums JOIN {table.ToString().ToLower()} USING (album_id) WHERE user_id = @userID LIMIT {offset}, {limit}";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+
+            // Query Database.
+            using (MySqlDataReader results = query.ExecuteReader())
+            {
+                // Read results into List of Albums.
+                List<Album> albums = new List<Album>();
+                while (results.Read())
+                {
+                    albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
+                }
+                return albums;
+            }
         }
 
         /// <summary>
@@ -183,15 +210,16 @@ namespace Apollo.Controllers {
             query.Parameters.AddWithValue("@albumUri", albumURI);
 
             // Query database.
-            MySqlDataReader result = query.ExecuteReader();
+            using (MySqlDataReader result = query.ExecuteReader())
+            {
+                if (!result.Read())
+                {
+                    throw new ArgumentException("Cannot find album in database");
+                }
 
-            if(!result.Read()) {
-                result.Close();
-                throw new ArgumentException("Cannot find album in database");
+                // Create the album model and return.
+                return new Album(result.GetString(0), result.GetString(1), result.GetString(2), result.GetString(3));
             }
-
-            // Create the album model and return.
-            return new Album(result.GetString(0), result.GetString(1), result.GetString(2), result.GetString(3));
         }
 
         /// <summary>
@@ -212,15 +240,17 @@ namespace Apollo.Controllers {
             query.Parameters.AddWithValue("@userID", userID);
 
             // Query Database.
-            MySqlDataReader results = query.ExecuteReader();
+            using (MySqlDataReader results = query.ExecuteReader())
+            {
+                // Read results into List of Albums.
+                List<Album> albums = new List<Album>();
+                while (results.Read())
+                {
+                    albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
+                }
 
-            // Read results into List of Albums.
-            List<Album> albums = new List<Album>();
-            while (results.Read()) {
-                albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
+                return albums;
             }
-
-            return albums;
         }
 
         /// <summary>
@@ -245,6 +275,13 @@ namespace Apollo.Controllers {
             return result;
         }
 
+        /// <summary>
+        /// Changes the password for a user.
+        /// </summary>
+        /// <param name="userID">The user identifier.</param>
+        /// <param name="oldPass">The old password.</param>
+        /// <param name="newPass">The new password.</param>
+        /// <returns></returns>
         public bool ChangePassword(string userID, string oldPass, string newPass) {
             // Setup SQL query.
             string sql = "UPDATE user SET password = @newPass WHERE user_id = @userID AND password = @oldPass";
@@ -259,12 +296,39 @@ namespace Apollo.Controllers {
             return result == 1;
         }
 
+        /// <summary>
+        /// Changes the email.
+        /// </summary>
+        /// <param name="userID">The user identifier.</param>
+        /// <param name="newEmail">The new email.</param>
+        /// <returns></returns>
         public bool ChangeEmail(string userID, string newEmail) {
             // Setup SQL query.
             string sql = "UPDATE user SET email = @newEmail WHERE user_id = @userID";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
             query.Parameters.AddWithValue("@userID", userID);
             query.Parameters.AddWithValue("@newEmail", newEmail);
+
+            // Query database.
+            int result = query.ExecuteNonQuery();
+
+            return result == 1;
+        }
+
+        /// <summary>
+        /// Removes an album from a bridging table.
+        /// </summary>
+        /// <param name="userID">The user identifier.</param>
+        /// <param name="albumURI">The album URI.</param>
+        /// <param name="table">The bridging table.</param>
+        /// <returns></returns>
+        public bool RemoveAlbumFromBridge(string userID, string albumURI, BridgingTables table)
+        {
+            // Setup SQL query.
+            string sql = $"DELETE FROM {table.ToString().ToLower()} WHERE user_id = @userID AND albumURI = @albumURI";
+            MySqlCommand query = new MySqlCommand(sql, dbConnection);
+            query.Parameters.AddWithValue("@userID", userID);
+            query.Parameters.AddWithValue("@albumURI", albumURI);
 
             // Query database.
             int result = query.ExecuteNonQuery();

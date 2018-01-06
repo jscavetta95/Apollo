@@ -12,6 +12,7 @@ using SpotifyAPI.Web.Enums;
 using Apollo.Models;
 using SpotifyAPI.Web.Models;
 using SpotifyAPI.Web;
+using System.Web.Services;
 
 namespace Apollo.Controllers {
     public class ApolloController : Controller {
@@ -248,12 +249,12 @@ namespace Apollo.Controllers {
                     dbHandler.GetUserID(regUsername);
                     // If this was successful, return an error.
                     Session[ERROR_SESSION] = "Username already exists.";
-                    return Redirect("Discover");
+                    return Redirect("Login");
                 } catch (Exception) {
                     // User doesn't exists, create the new user.
                     Session[LOGGED_IN_USERID_SESSION] = dbHandler.Register(regUsername, regPassword, regEmail);
                     Session[LOGGED_IN_USERNAME_SESSION] = regUsername;
-                    return Redirect("Login");
+                    return Redirect("Albums");
                 }
             }
         }
@@ -299,6 +300,127 @@ namespace Apollo.Controllers {
         {
             Session.Abandon();
             return Redirect("Index");
+        }
+        #endregion
+
+        #region Album
+        public ActionResult Albums()
+        {
+            if (Session[LOGGED_IN_USERNAME_SESSION] == null)
+            {
+                return Redirect("Login");
+            }
+
+            Dictionary<ApolloDBHandler.BridgingTables, List<Album>> listenedAlbumsDictionary = new Dictionary<ApolloDBHandler.BridgingTables, List<Album>>();
+            string userID = Session[LOGGED_IN_USERID_SESSION].ToString();
+
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                listenedAlbumsDictionary.Add(ApolloDBHandler.BridgingTables.LIKED_ALBUMS, dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.LIKED_ALBUMS, 3, 0));
+                listenedAlbumsDictionary.Add(ApolloDBHandler.BridgingTables.PASSED_ALBUMS, dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.PASSED_ALBUMS, 3, 0));
+            }
+            return View(listenedAlbumsDictionary);
+        }
+
+        public ActionResult GetAlbum(int index, ApolloDBHandler.BridgingTables table)
+        {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                try
+                {
+                    Album album = dbHandler.GetAlbumsFromBridge(Session[LOGGED_IN_USERID_SESSION].ToString(), table, 1, index)[0];
+                    return Json(new { imageLink = album.ImageLink, uri = album.Uri });
+                }
+                catch (Exception)
+                {
+                    return new HttpStatusCodeResult(500, "Album not found"); ;
+                }
+            }
+        }
+
+        [WebMethod]
+        public List<String> SearchForAlbum(string searchInput)
+        {
+            // Get spotify authorization token.
+            ClientCredentialsAuth auth = new ClientCredentialsAuth()
+            {
+                ClientId = SpotifyAPIModel.CLIENT_ID,
+                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
+            };
+            Token token = auth.DoAuth();
+
+            // Establish spotify connection.
+            SpotifyWebAPI spotify = new SpotifyWebAPI()
+            {
+                TokenType = token.TokenType,
+                AccessToken = token.AccessToken,
+                UseAuth = true,
+            };
+
+            List<string> results = new List<string>();
+            spotify.SearchItems(searchInput, SearchType.Album).Albums.Items.ForEach(album => results.Add(album.Name));
+
+            return results;
+        }
+
+        public ActionResult AddAlbumSeed(string searchInput)
+        {
+            // Get spotify authorization token.
+            ClientCredentialsAuth auth = new ClientCredentialsAuth()
+            {
+                ClientId = SpotifyAPIModel.CLIENT_ID,
+                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
+            };
+            Token token = auth.DoAuth();
+
+            // Establish spotify connection.
+            SpotifyWebAPI spotify = new SpotifyWebAPI()
+            {
+                TokenType = token.TokenType,
+                AccessToken = token.AccessToken,
+                UseAuth = true,
+            };
+
+            SimpleAlbum simpleAlbum = spotify.SearchItems(searchInput, SearchType.Album).Albums.Items[0];
+            
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                try
+                {
+                    // Try to find the album by the uri in the database.
+                    dbHandler.GetAlbum(simpleAlbum.Uri);
+                }
+                catch (Exception)
+                {
+                    // Add the album to the database.
+                    FullAlbum fullAlbum = spotify.GetAlbum(simpleAlbum.Id);
+                    dbHandler.InsertAlbum(new Album(fullAlbum.Name, fullAlbum.Artists[0].Id, fullAlbum.Uri, fullAlbum.Images[0].Url));
+                }
+                // Add the album to liked.
+                dbHandler.BridgeUserAndAlbum_AlbumURI(
+                    Session[LOGGED_IN_USERID_SESSION].ToString(),
+                    simpleAlbum.Uri,
+                    ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
+            }
+
+            return Redirect("Albums");
+        }
+
+        public ActionResult RemoveListenedAlbum(string albumURI, bool like)
+        {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                if (like)
+                {
+                    dbHandler.RemoveAlbumFromBridge(Session[LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
+                }
+                else
+                {
+                    dbHandler.RemoveAlbumFromBridge(Session[LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.PASSED_ALBUMS);
+                }
+            }
+
+            return Redirect("Albums");
         }
         #endregion
     }

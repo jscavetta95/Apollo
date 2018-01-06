@@ -1,5 +1,4 @@
-﻿@using Apollo.Controllers
-@using Apollo.Models.Apollo
+﻿@using Apollo.Models.Apollo
 @model List<Album>
 @{
     ViewBag.Title = "Discover";
@@ -30,21 +29,6 @@
 @section scripts {
     <script>
         $(function () {
-            $('button').on("click", function () {
-                this.off("click");
-                $.ajax({
-                    type: "POST",
-                    url: "@Url.Action("ChangeEmail", "Apollo")",
-                    dataType: 'json',
-                    data:
-                    {
-                        buttonType: $(this).attr('id'),
-                        albumURI: $(this).attr('name')
-                    }
-                });
-                location.reload(true);
-            });
-
             $('.albumImgSelect').on("click", function () {
                 var url = "https://embed.spotify.com/?uri=";
                 var uri = $(this).attr('name');

@@ -135,3 +135,64 @@ footer {
 #discoverAlbumListContainer {
     max-width: 35%;
 }
+
+.img-album, .get-next, .get-prev {
+    display: inline-block;
+    position: relative;
+}
+
+#selected-liked, #selected-passed {
+    height: 250px;
+    width: 250px;
+    margin: auto;
+    z-index: 10;
+}
+
+#next-liked, #next-passed {
+    height: 225px;
+    width: 225px;
+    margin-bottom: 12.5px;
+    margin-left: -150px;
+    z-index: 9;
+}
+
+#prev-liked, #prev-passed {
+    height: 225px;
+    width: 225px;
+    margin-bottom: 12.5px;
+    margin-right: -150px;
+    z-index: 9;
+}
+
+#nnext-liked, #nnext-passed {
+    height: 200px;
+    width: 200px;
+    margin-bottom: 25px;
+    margin-left: -175px;
+    z-index: 8;
+}
+
+#pprev-liked, #pprev-passed {
+    height: 200px;
+    width: 200px;
+    margin-bottom: 25px;
+    margin-right: -175px;
+    z-index: 8;
+}
+
+.get-next, .get-prev {
+    height: 250px;
+    margin: auto 45px auto 10px;
+    z-index: 8;
+    position: relative;
+}
+
+.btn-albums {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+#likedAlbumsViewerBody, #passedAlbumsViewerBody {
+    padding: 25px 0;
+}

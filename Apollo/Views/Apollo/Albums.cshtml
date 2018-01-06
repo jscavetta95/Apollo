@@ -8,7 +8,7 @@
 <div id="albumsBody" class="container">
     <div id="likedAlbumsViewerBody" class="col-lg-6 col-sm-12 text-center" style="background-color:aqua">
         <div class="get-prev">
-            <p class="btn btn-info btn-albums ">&#10096</p>
+            <button class="btn btn-info btn-albums ">&#10096</button>
         </div>
         <div id="pprev-liked" class="img-album">
 
@@ -26,13 +26,13 @@
             <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][2].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][2].Uri">
         </div>
         <div class="get-next">
-            <p class="btn btn-info btn-albums ">&#10097</p>
+            <button class="btn btn-info btn-albums ">&#10097</button>
         </div>
     </div>
 
     <div id="passedAlbumsViewerBody" class="col-lg-6 col-sm-12 text-center" style="background-color:green">
         <div class="get-prev">
-            <p class="btn btn-info btn-albums ">&#10096</p>
+            <button class="btn btn-info btn-albums ">&#10096</button>
         </div>
         <div id="pprev-passed" class="img-album">
 
@@ -50,7 +50,7 @@
             <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][2].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][2].Uri">
         </div>
         <div class="get-next">
-            <p class="btn btn-info btn-albums ">&#10097</p>
+            <button class="btn btn-info btn-albums ">&#10097</button>
         </div>
     </div>
 
@@ -90,7 +90,7 @@
             }
         }
 
-        function GetNext_Fail(albums, passed) {
+        function GetNext_Null(albums, passed) {
             if (albums.eq(albums.length - 2).children().length > 0) {
                 for (var i = 0; i < albums.length - 1; i++) {
                     if (albums.eq(i + 1).children().length > 0) {
@@ -135,7 +135,7 @@
             }
         }
 
-        function GetPrev_Fail(albums, passed) {
+        function GetPrev_Null(albums, passed) {
             if (albums.eq(1).children().length > 0) {
                 for (var i = albums.length - 1; i > 0; i--) {
                     if (albums.eq(i - 1).children().length > 0) {
@@ -156,47 +156,71 @@
         }
 
         $(function () {
-            $('#likedAlbumsViewerBody > .get-next').on("click", function () {
+            $('#likedAlbumsViewerBody > .get-next > button').on("click", function () {
+                $('#likedAlbumsViewerBody > .get-next > button').attr("disabled", true);
                 $.post(
                     "@Url.Action("GetAlbum", "Apollo")",
                     { index: likedAlbumIndex + 3, table: 0 },
                     function (data) {
-                        GetNext($('#likedAlbumsViewerBody').children('.img-album'), data, 0);
+                        if (data) {
+                            GetNext($('#likedAlbumsViewerBody').children('.img-album'), data, 0);
+                        } else {
+                            GetNext_Null($('#likedAlbumsViewerBody').children('.img-album'), 0);
+                        }
+                        $('#likedAlbumsViewerBody > .get-next > button').attr("disabled", false);
                     }).fail(function () {
-                        GetNext_Fail($('#likedAlbumsViewerBody').children('.img-album'), 0);
+                        $('#likedAlbumsViewerBody > .get-next > button').attr("disabled", false);
                     });
             });
 
-            $('#likedAlbumsViewerBody > .get-prev').on("click", function () {
+            $('#likedAlbumsViewerBody > .get-prev > button').on("click", function () {
+                $('#likedAlbumsViewerBody > .get-prev > button').attr("disabled", true);
                 $.post(
                     "@Url.Action("GetAlbum", "Apollo")",
                     { index: likedAlbumIndex - 3, table: 0 },
                     function (data) {
-                        GetPrev($('#likedAlbumsViewerBody').children('.img-album'), data, 0);
+                        if (data) {
+                            GetPrev($('#likedAlbumsViewerBody').children('.img-album'), data, 0);
+                        } else {
+                            GetPrev_Null($('#likedAlbumsViewerBody').children('.img-album'), 0);
+                        }
+                        $('#likedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
                     }).fail(function () {
-                        GetPrev_Fail($('#likedAlbumsViewerBody').children('.img-album'), 0);
+                        $('#likedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
                     });
             });
 
-            $('#passedAlbumsViewerBody > .get-next').on("click", function () {
+            $('#passedAlbumsViewerBody > .get-next > button').on("click", function () {
+                $('#passedAlbumsViewerBody > .get-next > button').attr("disabled", true);
                 $.post(
                     "@Url.Action("GetAlbum", "Apollo")",
                     { index: passedAlbumIndex + 3, table: 1 },
                     function (data) {
-                        GetNext($('#passedAlbumsViewerBody').children('.img-album'), data, 1);
+                        if (data) {
+                            GetNext($('#passedAlbumsViewerBody').children('.img-album'), data, 1);
+                        } else {
+                            GetNext_Null($('#passedAlbumsViewerBody').children('.img-album'), 1);
+                        }
+                        $('#passedAlbumsViewerBody > .get-next > button').attr("disabled", false);
                     }).fail(function () {
-                        GetNext_Fail($('#passedAlbumsViewerBody').children('.img-album'), 1);
+                        $('#passedAlbumsViewerBody > .get-next > button').attr("disabled", false);
                     });
             });
 
-            $('#passedAlbumsViewerBody > .get-prev').on("click", function () {
+            $('#passedAlbumsViewerBody > .get-prev > button').on("click", function () {
+                $('#passedAlbumsViewerBody > .get-prev > button').attr("disabled", true);
                 $.post(
                     "@Url.Action("GetAlbum", "Apollo")",
                     { index: passedAlbumIndex - 3, table: 1 },
                     function (data) {
-                        GetPrev($('#passedAlbumsViewerBody').children('.img-album'), data, 1);
+                        if (data) {
+                            GetPrev($('#passedAlbumsViewerBody').children('.img-album'), data, 1);
+                        } else {
+                            GetPrev_Null($('#passedAlbumsViewerBody').children('.img-album'), 1);
+                        }
+                        $('#passedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
                     }).fail(function () {
-                        GetPrev_Fail($('#passedAlbumsViewerBody').children('.img-album'), 1);
+                        $('#passedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
                     });
             });
         });

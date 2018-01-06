@@ -333,7 +333,7 @@ namespace Apollo.Controllers {
                 }
                 catch (Exception)
                 {
-                    return new HttpStatusCodeResult(500, "Album not found"); ;
+                    return null;
                 }
             }
         }

@@ -21,6 +21,7 @@ namespace Apollo.Controllers {
         public const string LOGGED_IN_USERNAME_SESSION = "LoggedInUsername";
         public const string LOGGED_IN_USERID_SESSION = "LoggedInUserID";
         public const string ERROR_SESSION = "LoginError";
+        public const string SPOTIFY_TOKEN_SESSION = "Token";
         #endregion
 
         #region Index
@@ -110,13 +111,11 @@ namespace Apollo.Controllers {
         }
 
         private void GetAlbumRecommendations(string userID, List<Album> recommendedAlbums) {
-            
-            // Get spotify authorization token.
-            ClientCredentialsAuth auth = new ClientCredentialsAuth() {
-                ClientId = SpotifyAPIModel.CLIENT_ID,
-                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
-            };
-            Token token = auth.DoAuth();
+            Token token = Session[SPOTIFY_TOKEN_SESSION] as Token;
+            if (token.IsExpired())
+            {
+                RefreshSpotifyToken();
+            }
 
             // Establish spotify connection.
             SpotifyWebAPI spotify = new SpotifyWebAPI() {
@@ -223,6 +222,8 @@ namespace Apollo.Controllers {
                 Session[LOGGED_IN_USERNAME_SESSION] = loginUsername;
             }
 
+            RefreshSpotifyToken();
+
             return Redirect("Discover");
         }
 
@@ -257,6 +258,18 @@ namespace Apollo.Controllers {
                     return Redirect("Albums");
                 }
             }
+        }
+        
+        private void RefreshSpotifyToken()
+        {
+            // Get spotify authorization token.
+            ClientCredentialsAuth auth = new ClientCredentialsAuth()
+            {
+                ClientId = SpotifyAPIModel.CLIENT_ID,
+                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
+            };
+            Token token = auth.DoAuth();
+            Session[SPOTIFY_TOKEN_SESSION] = token;
         }
         #endregion
 
@@ -338,16 +351,13 @@ namespace Apollo.Controllers {
             }
         }
 
-        [WebMethod]
-        public List<String> SearchForAlbum(string searchInput)
+        public ActionResult SearchForAlbum(string searchInput)
         {
-            // Get spotify authorization token.
-            ClientCredentialsAuth auth = new ClientCredentialsAuth()
+            Token token = Session[SPOTIFY_TOKEN_SESSION] as Token;
+            if(token.IsExpired())
             {
-                ClientId = SpotifyAPIModel.CLIENT_ID,
-                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
-            };
-            Token token = auth.DoAuth();
+                RefreshSpotifyToken();
+            }
 
             // Establish spotify connection.
             SpotifyWebAPI spotify = new SpotifyWebAPI()
@@ -357,49 +367,52 @@ namespace Apollo.Controllers {
                 UseAuth = true,
             };
 
-            List<string> results = new List<string>();
-            spotify.SearchItems(searchInput, SearchType.Album).Albums.Items.ForEach(album => results.Add(album.Name));
+            List<SearchResult> results = new List<SearchResult>();
+            SearchItem searchItem = spotify.SearchItems(searchInput, SearchType.Album);
+            if(searchItem.Albums != null && searchItem.Albums.Total > 0)
+            {
+                searchItem.Albums.Items.ForEach(album => results.Add(new SearchResult(album.Name, album.Images[1].Url, album.Uri)));
+            }
 
-            return results;
+            return Json(results);
         }
 
-        public ActionResult AddAlbumSeed(string searchInput)
+        public ActionResult AddAlbumSeed(string Uri)
         {
-            // Get spotify authorization token.
-            ClientCredentialsAuth auth = new ClientCredentialsAuth()
-            {
-                ClientId = SpotifyAPIModel.CLIENT_ID,
-                ClientSecret = SpotifyAPIModel.CLIENT_SECRET
-            };
-            Token token = auth.DoAuth();
-
-            // Establish spotify connection.
-            SpotifyWebAPI spotify = new SpotifyWebAPI()
-            {
-                TokenType = token.TokenType,
-                AccessToken = token.AccessToken,
-                UseAuth = true,
-            };
-
-            SimpleAlbum simpleAlbum = spotify.SearchItems(searchInput, SearchType.Album).Albums.Items[0];
-            
             using (ApolloDBHandler dbHandler = new ApolloDBHandler())
             {
                 try
                 {
                     // Try to find the album by the uri in the database.
-                    dbHandler.GetAlbum(simpleAlbum.Uri);
+                    dbHandler.GetAlbum(Uri);
                 }
                 catch (Exception)
                 {
+                    // Establish spotify connection.
+                    Token token = Session[SPOTIFY_TOKEN_SESSION] as Token;
+                    if (token.IsExpired())
+                    {
+                        RefreshSpotifyToken();
+                    }
+
+                    SpotifyWebAPI spotify = new SpotifyWebAPI()
+                    {
+                        TokenType = token.TokenType,
+                        AccessToken = token.AccessToken,
+                        UseAuth = true,
+                    };
+
+                    // Get ID from URI
+                    string id = Uri.Split(':')[2];
+
                     // Add the album to the database.
-                    FullAlbum fullAlbum = spotify.GetAlbum(simpleAlbum.Id);
+                    FullAlbum fullAlbum = spotify.GetAlbum(id);
                     dbHandler.InsertAlbum(new Album(fullAlbum.Name, fullAlbum.Artists[0].Id, fullAlbum.Uri, fullAlbum.Images[0].Url));
                 }
                 // Add the album to liked.
                 dbHandler.BridgeUserAndAlbum_AlbumURI(
                     Session[LOGGED_IN_USERID_SESSION].ToString(),
-                    simpleAlbum.Uri,
+                    Uri,
                     ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
             }
 

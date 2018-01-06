@@ -55,8 +55,7 @@
     </div>
 
     <div id="albumSeedBody" class="col-lg-12 col-sm-12" style="background-color:gold">
-        <br />
-        <br />
+        <input id="albumSeedText" type="search" name="albumSeedText" class="ui-autocomplete form-control" placeholder="Search for an Album" maxlength="50" required>
     </div>
 </div>
 
@@ -224,5 +223,26 @@
                     });
             });
         });
+
+        $('#albumSeedText').autocomplete({
+            autoFocus: false,
+            delay: 500,
+            minLength: 3,
+            classes: { "ui-autocomplete": "highlight" },
+            source: function (request, response) {
+                $.post(
+                    "@Url.Action("SearchForAlbum", "Apollo")",
+                    { searchInput: request.term },
+                    function (data) {
+                        response(data);
+                    }
+                );
+            },
+            select: function (event, ui) {
+                window.location.replace('@Url.Action("AddAlbumSeed", "Apollo")?Uri=' + ui.item.Uri);
+            }
+        }).autocomplete("instance")._renderItem = function (ul, item) {
+            return $("<li class='selector'><div><img src='" + item.Img + "' name='" + item.Uri + "' class='img-responsive img-search'/><span>" + item.Value + "</span></div></li>").appendTo(ul);
+        };
     </script>
 }

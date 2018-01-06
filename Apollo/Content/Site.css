@@ -84,7 +84,7 @@ td {
 }
 
 .fa {
-    font-size: 15px !important;
+    font-size: 15px;
 }
 
 .btn-discover {
@@ -97,7 +97,7 @@ td {
 }
 
 .panel-default {
-    margin: 14px 0px;
+    margin: 14px 0;
     height: 320px;
     width: 200px;
 }
@@ -195,4 +195,22 @@ footer {
 
 #likedAlbumsViewerBody, #passedAlbumsViewerBody {
     padding: 25px 0;
+}
+
+.img-search {
+    height: 300px;
+    width: 300px;
+}
+
+.selector {
+    float: left;
+}
+
+#albumSeedBody {
+    height: 100px;
+}
+
+#albumSeedText {
+    top: 15%;
+    left: 10%;
 }

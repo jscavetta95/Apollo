@@ -141,14 +141,19 @@ footer {
     position: relative;
 }
 
-#selected-liked, #selected-passed {
+.img-album {
+    background-color: lightslategray;
+    border: 2px ridge dimgray;
+}
+
+.selected {
     height: 250px;
     width: 250px;
     margin: auto;
     z-index: 10;
 }
 
-#next-liked, #next-passed {
+.next {
     height: 225px;
     width: 225px;
     margin-bottom: 12.5px;
@@ -156,7 +161,7 @@ footer {
     z-index: 9;
 }
 
-#prev-liked, #prev-passed {
+.prev {
     height: 225px;
     width: 225px;
     margin-bottom: 12.5px;
@@ -164,7 +169,7 @@ footer {
     z-index: 9;
 }
 
-#nnext-liked, #nnext-passed {
+.nnext {
     height: 200px;
     width: 200px;
     margin-bottom: 25px;
@@ -172,7 +177,7 @@ footer {
     z-index: 8;
 }
 
-#pprev-liked, #pprev-passed {
+.pprev {
     height: 200px;
     width: 200px;
     margin-bottom: 25px;
@@ -213,4 +218,14 @@ footer {
 #albumSeedText {
     top: 15%;
     left: 10%;
+}
+
+.btn-remove {
+    text-align: center;
+    font-size: large;
+    height: 50px;
+    width: 50px;
+    background-color: #ce2e2e;
+    border-radius: 25px;
+    border: 2px solid dimgray;
 }

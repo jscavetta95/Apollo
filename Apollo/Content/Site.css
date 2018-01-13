@@ -1,15 +1,17 @@
-﻿body {
+﻿/*#region General*/
+
+body {
     padding-top: 50px;
     padding-bottom: 20px;
 }
 
-/* Set padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 0;
-    padding-right: 0;
-    width: auto;
-    margin-left: 0;
-    margin-right: 0;
+footer > p {
+    margin-left: 15px;
+}
+
+.center {
+    margin: auto;
+    text-align: center;
 }
 
 /* Override the default bootstrap behavior where horizontal description lists 
@@ -26,14 +28,97 @@ textarea {
     max-width: 280px;
 }
 
-.panel-primary {
-    background-color: #d4e0ea;
+/*#endregion*/
+
+/*#region NavBar*/
+
+@media (min-width: 768px) {
+    .container > .navbar-header {
+        margin-left: 15%;
+    }
+
+    .navbar-nav {
+        float: right;
+        margin-right: 10%;
+    }
 }
+
+@media (max-width: 768px) {
+    .container > .navbar-header {
+        margin: auto;
+    }
+}
+
+.navbar {
+    margin: 0;
+}
+
+.navbar-brand {
+    font-size: 30px;
+}
+
+.navbar-link {
+    font-size: 16px;
+    float: right;
+}
+
+/*#endregion*/
+
+/*#region Index*/
+
+.panel-primary {
+    background-color: #ecedef;
+    height: 100px;
+    margin: 0;
+}
+
     .panel-primary > .panel-heading {
-        background-color: #6dbb89;
+        width: 85%;
+        margin: 0px auto;
+        background: linear-gradient(to right, #ecedef, #6dbb89, #ecedef);
         border: none;
         font-family: Circular, Helvetica, Arial, sans-serif;
+        font-weight: bold;
+        color: #fff;
     }
+
+    #index > a:hover {
+        text-decoration: none;
+    }
+
+.panel-info {
+    margin: 20px auto;
+    width: 40%;
+    background-color: #353535;
+    color: #fff;
+    font-size: 16px;
+}
+
+    .panel-info > .panel-heading {
+        background: linear-gradient(to right, #353535, #ecedef, #353535);
+        width: 90%;
+        margin: 12px auto;
+        color: #353535;
+        font-weight: bold;
+        border-radius: 0;
+        border-style: none;
+        outline: none;
+    }
+
+    .panel-info > .panel-body > a {
+        color: #75c1ed;
+    }
+
+.panel {
+    border: none;
+    padding: 0;
+}
+
+/*#endregion*/
+
+
+
+
 
 .btn {
     font-size: medium;
@@ -59,25 +144,7 @@ textarea {
     background-color: #1ED760;
 }
 
-.panel {
-    border: none;
-    margin: 0;
-    padding: 20px 0;
-}
 
-.panel-info {
-    background-color: #ECEBE8;
-    color: #343232;
-    font-size: 16px;
-}
-    .panel-info > .btn-collapse {
-        background-color: #ECEBE8;
-        color: #343232;
-        font-size: 22px;
-        border-radius: 0;
-        border-style: none;
-        outline: none;
-    }
 
 td {
     min-width: 110px;
@@ -129,12 +196,10 @@ footer {
 .container {
     width: 100%;
     margin: 0;
-    padding: 5px;
+    padding: 0;
 }
 
-#discoverAlbumListContainer {
-    max-width: 35%;
-}
+/*#region Albums*/
 
 .img-album, .get-next, .get-prev {
     display: inline-block;
@@ -144,6 +209,12 @@ footer {
 .img-album {
     background-color: lightslategray;
     border: 2px ridge dimgray;
+}
+
+.get-next, .get-prev {
+    height: 250px;
+    margin: auto 45px auto 10px;
+    z-index: 8;
 }
 
 .selected {
@@ -185,20 +256,23 @@ footer {
     z-index: 8;
 }
 
-.get-next, .get-prev {
-    height: 250px;
-    margin: auto 45px auto 10px;
-    z-index: 8;
-    position: relative;
-}
-
 .btn-albums {
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
 }
 
-#likedAlbumsViewerBody, #passedAlbumsViewerBody {
+.btn-remove {
+    text-align: center;
+    font-size: large;
+    height: 50px;
+    width: 50px;
+    background-color: #ce2e2e;
+    border-radius: 25px;
+    border: 2px solid dimgray;
+}
+
+.panel-liked, .panel-passed {
     padding: 25px 0;
 }
 
@@ -211,21 +285,61 @@ footer {
     float: left;
 }
 
-#albumSeedBody {
-    height: 100px;
-}
-
-#albumSeedText {
+.albums input {
     top: 15%;
     left: 10%;
 }
 
-.btn-remove {
-    text-align: center;
-    font-size: large;
-    height: 50px;
-    width: 50px;
-    background-color: #ce2e2e;
-    border-radius: 25px;
-    border: 2px solid dimgray;
+.albums iframe {
+    margin: 5px 0 5px 4px;
 }
+
+/*#endregion*/
+
+
+
+
+/*#region Discover*/
+
+.img-selectable {
+    padding: 8px;
+}
+
+.discover iframe {
+    height: 100%
+}
+
+.discover .panel-player {
+    width: 315px;
+    height: 685px;
+    padding-right: 15px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.discover .panel-albums {
+    width: 600px;
+    height: 700px;
+    display: inline-block;
+}
+
+.btn-like {
+    background-color: #6dbb89;
+    color: #1e1e1e;
+}
+    .btn-like:hover {
+        background-color: #17bf53;
+        color: #1e1e1e;
+    }
+
+.btn-pass {
+    background-color: #e15c5c;
+    color: #1e1e1e;
+}
+    .btn-pass:hover {
+        background-color: #e54a4a;
+        color: #1e1e1e;
+    }
+
+/*#endregion*/
+

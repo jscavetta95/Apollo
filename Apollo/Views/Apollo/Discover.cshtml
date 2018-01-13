@@ -4,39 +4,42 @@
     ViewBag.Title = "Discover";
 }
 
-<div class="container">
-    <div id="spotifyPlayerContainer" class="text-center col-sm-5">
-        <!-- NOTE: uri will have to be dynamically created to change the album on the widget -->
-        <iframe style="height: 70vh" id="spotifyPlayer" src="" frameborder="1"></iframe>
-    </div>
-
-    <div id="discoverAlbumListContainer" class="text-center screen col-sm-7 row">
-        @foreach (Album album in Model) {
-            <div class="panel panel-default col-sm-4">
-                <div class="panel-heading text-title text-center">@album.Name</div>
-                <div class="panel-body">
-                    <img class="albumImgSelect img-responsive img-rounded" src="@album.ImageLink" alt="Album Image" name="@album.Uri">
-                    <div class="text-center">
-                        @Html.ActionLink("Like", "ProcessAlbum", "Apollo", new { albumURI = album.Uri, like = true }, new { @class = "btn btn-primary btn-discover", @name = album.Uri })
-                        @Html.ActionLink("Pass", "ProcessAlbum", "Apollo", new { albumURI = album.Uri, like = false }, new { @class = "btn btn-danger btn-discover", @name = album.Uri })
+<div class="container discover">
+    <div class="center">
+        <div class="panel-player">
+            <iframe frameborder="0"></iframe>
+        </div>
+        <div class="panel-albums">
+            @foreach (Album album in Model)
+            {
+                <div class="panel panel-default col-sm-4">
+                    <div class="panel-heading text-title text-center">@album.Name</div>
+                    <div class="panel-body">
+                        <img class="img-selectable img-responsive img-rounded" src="@album.ImageLink" alt="Album Image" name="@album.Uri">
+                        <div class="text-center">
+                            @Html.ActionLink("Like", "ProcessAlbum", "Apollo", new { albumURI = album.Uri, like = true }, new { @class = "btn btn-like btn-discover", @name = album.Uri })
+                            @Html.ActionLink("Pass", "ProcessAlbum", "Apollo", new { albumURI = album.Uri, like = false }, new { @class = "btn btn-pass btn-discover", @name = album.Uri })
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 
 @section scripts {
     <script>
+        var url = "https://open.spotify.com/embed?uri=";
+
         $(function () {
-            $('.albumImgSelect').on("click", function () {
-                var url = "https://embed.spotify.com/?uri=";
-                var uri = $(this).attr('name');
-                var newSrc = url.concat(uri);
-                $('#spotifyPlayer').attr("src", newSrc);
-                $(".albumSelection").css("background", "");
-                $(this).parent().css("background", "linear-gradient(to right, #9bc394, #cffac8, #9bc394)");
+            $('.img-selectable').on("click", function () {
+                $('iframe').attr("src", url.concat($(this).attr('name')));
+                $(".img-selectable").css("background", "");
+                $(this).css("background", "linear-gradient(to right, #9bc394, #cffac8, #9bc394)");
             });
+
+            $('iframe').attr("src", url.concat($('.panel-albums img:first').attr('name')));
+            $('.panel-albums img:first').css("background", "linear-gradient(to right, #9bc394, #cffac8, #9bc394)");
         });
     </script>
 }

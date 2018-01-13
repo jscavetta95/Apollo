@@ -3,25 +3,32 @@
     ViewBag.Title = "Apollo";
 }
 
-<div id="indexContent" class="mainBorders">
+<div id="index">
 
-    @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] != null) {
-        <div class="panel panel-primary text-center">
-            <h3 class="panel-heading">Welcome back, start discovering now.</h3>
-            @Html.ActionLink("Discover", "Discover", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
-            <br /><br />
-            <h3 class="panel-heading">Listen to liked albums and add new album seeds.</h3>
-            @Html.ActionLink("Albums", "Albums", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
-        </div>
-    } else {
-        <div class="panel panel-primary text-center">
-            <h3 class="panel-heading">Welcome to Apollo. Register or login to start discovering new music.</h3>
-            @Html.ActionLink("Register | Login", "Login", "Apollo", new { area = "" }, new { @class = "panel-body btn btn-primary" })
-        </div>
+    @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] != null)
+    {
+        <a href="@Url.Action("Discover")">
+            <div class="panel panel-primary text-center">
+                <h2 class="panel-heading">Welcome back, start discovering now.</h2>
+            </div>
+        </a>
+        <a href="@Url.Action("Albums")">
+            <div class="panel panel-primary text-center">
+                <h2 class="panel-heading">Listen to liked albums and add new album seeds.</h2>
+            </div>
+        </a>
+    }
+    else
+    {
+        <a href="@Url.Action("Login")">
+            <div class="panel panel-primary text-center">
+                <h2 class="panel-heading">Welcome to Apollo. Register or login to start discovering new music.</h2>
+            </div>
+        </a>
     }
 
     <div id="aboutContainer" class="panel panel-info text-center">
-        <h3 class="panel-heading">What is Apollo</h3>
+        <h2 class="panel-heading">What is Apollo</h2>
         <p class="panel-body">
             Apollo is a simple music discovery tool that utilizes the Spotify API. Apollo allows for users to discover
             new albums through an initial album seed, which is used to populate a list of albums from artists similar to

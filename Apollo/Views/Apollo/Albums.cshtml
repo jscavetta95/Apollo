@@ -5,8 +5,8 @@
     ViewBag.Title = "Albums";
 }
 
-<div id="albumsBody" class="container">
-    <div id="likedAlbumsViewerBody" class="col-lg-6 col-sm-12 text-center" style="background-color:aqua">
+<div class="container albums">
+    <div class="col-lg-6 col-sm-12 text-center panel-liked">
         <div class="get-prev">
             <button class="btn btn-info btn-albums ">&#10096</button>
         </div>
@@ -17,25 +17,25 @@
 
         </div>
         <div class="selected img-album">
-            <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][0].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][0].Uri">
+            <img class="img-responsive">
         </div>
         <div class="next img-album">
-            <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][1].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][1].Uri">
+            <img class="img-responsive">
         </div>
         <div class="nnext img-album">
-            <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][2].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS][2].Uri">
+            <img class="img-responsive">
         </div>
         <div class="get-next">
             <button class="btn btn-info btn-albums ">&#10097</button>
         </div>
-        <div id="albumControls">
+        <div class="album-controls">
             <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
             <br />
             <button class="btn btn-remove">&#10006</button>
         </div>
     </div>
 
-    <div id="passedAlbumsViewerBody" class="col-lg-6 col-sm-12 text-center" style="background-color:green">
+    <div class="col-lg-6 col-sm-12 text-center panel-passed">
         <div class="get-prev">
             <button class="btn btn-info btn-albums ">&#10096</button>
         </div>
@@ -46,200 +46,232 @@
 
         </div>
         <div class="selected img-album">
-            <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][0].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][0].Uri">
+            <img class="img-responsive">
         </div>
         <div class="next img-album">
-            <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][1].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][1].Uri">
+            <img class="img-responsive">
         </div>
         <div class="nnext img-album">
-            <img class="img-responsive" src="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][2].ImageLink" alt="Album Image" name="@Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS][2].Uri">
+            <img class="img-responsive">
         </div>
         <div class="get-next">
             <button class="btn btn-info btn-albums ">&#10097</button>
         </div>
-        <div id="albumControls">
+        <div class="album-controls">
             <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
             <br />
             <button class="btn btn-remove">&#10006</button>
         </div>   
     </div>
 
-    <div id="albumSeedBody" class="col-lg-12 col-sm-12" style="background-color:gold">
-        <input id="albumSeedText" type="search" name="albumSeedText" class="ui-autocomplete form-control" placeholder="Search for an Album" maxlength="50" required>
+    <div class="col-lg-12 col-sm-12">
+        <input name="album-search" type="search" class="ui-autocomplete form-control" placeholder="Search for an Album" maxlength="50">
+        <br /> <br /> <br />
     </div>
 </div>
 
 @section scripts {
     <script>
+        var url = "https://open.spotify.com/embed?uri=";
+
         var likedAlbumIndex = 0;
         var passedAlbumIndex = 0;
 
         var likedAlbums = @Html.Raw(Json.Encode(Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS]));
         var passedAlbums = @Html.Raw(Json.Encode(Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS]));
 
-        debugger;
-
-        function GetNext(albums, data, passed) {
-            var start;
-            if (albums.eq(1).children().length == 0) {
-                albums.eq(1).append('<img class="img-responsive" alt="Album Image">');
-                start = 1;
-            } else if (albums.eq(0).children().length == 0) {
-                albums.eq(0).append('<img class="img-responsive" alt="Album Image">');
-                start = 0;
-            } else {
-                start = 0;
+        function GetNext(divs, newAlbum)
+        {
+            for (var i = 0; i < divs.length - 1; i++)
+            {
+                if (divs.eq(i + 1).children().length > 0)
+                {
+                    if (divs.eq(i).children().length == 0)
+                    {
+                        divs.eq(i).append('<img class="img-responsive">');
+                    }
+                    divs.eq(i).children().eq(0).attr("src", divs.eq(i + 1).children().eq(0).attr("src"));
+                }
+                else
+                {
+                    divs.eq(i).children().eq(0).remove();
+                }
             }
-            for (var i = start; i < albums.length - 1; i++) {
-                albums.eq(i).children().eq(0).attr("src", albums.eq(i + 1).children().eq(0).attr("src"));
-                albums.eq(i).children().eq(0).attr("name", albums.eq(i + 1).children().eq(0).attr("name"));
-            }
-            albums.eq(albums.length - 1).children().eq(0).attr("src", data.imageLink);
-            albums.eq(albums.length - 1).children().eq(0).attr("name", data.uri);
 
-            if (passed == 1) {
-                passedAlbumIndex++;
-            } else {
-                likedAlbumIndex++;
+            if (newAlbum)
+            {
+                divs.eq(divs.length - 1).children().eq(0).attr("src", newAlbum.ImageLink);
+            }
+            else
+            {
+                divs.eq(divs.length - 1).children().eq(0).remove();
             }
         }
 
-        function GetNext_Null(albums, passed) {
-            if (albums.eq(albums.length - 2).children().length > 0) {
-                for (var i = 0; i < albums.length - 1; i++) {
-                    if (albums.eq(i + 1).children().length > 0) {
-                        albums.eq(i).children().eq(0).attr("src", albums.eq(i + 1).children().eq(0).attr("src"));
-                        albums.eq(i).children().eq(0).attr("name", albums.eq(i + 1).children().eq(0).attr("name"));
-                    } else {
-                        albums.eq(i).children().eq(0).remove();
+        function GetPrev(divs, newAlbum)
+        {
+            for (var i = divs.length - 1; i > 0; i--)
+            {
+                if (divs.eq(i - 1).children().length > 0)
+                {
+                    if (divs.eq(i).children().length == 0)
+                    {
+                        divs.eq(i).append('<img class="img-responsive">');
                     }
+                    divs.eq(i).children().eq(0).attr("src", divs.eq(i - 1).children().eq(0).attr("src"));
                 }
-                albums.eq(albums.length - 1).children().eq(0).remove();
+                else
+                {
+                    divs.eq(i).children().eq(0).remove();
+                }
+            }
 
-                if (passed == 1) {
-                    passedAlbumIndex++;
-                } else {
+            if (newAlbum)
+            {
+                divs.eq(0).children().eq(0).attr("src", newAlbum.ImageLink);
+            }
+            else
+            {
+                divs.eq(0).children().eq(0).remove();
+            }
+        }
+
+        $(function ()
+        {
+            for (var i = 0; i < 3 && i < likedAlbums.length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        $('.panel-liked > .selected').children().eq(0).attr("src", likedAlbums[i].ImageLink);
+                        $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
+                        break;
+                    case 1:
+                        $('.panel-liked > .next').children().eq(0).attr("src", likedAlbums[i].ImageLink);
+                        break;
+                    case 2:
+                        $('.panel-liked > .nnext').children().eq(0).attr("src", likedAlbums[i].ImageLink);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            for (var i = 0; i < 3 && i < passedAlbums.length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        $('.panel-passed > .selected').children().eq(0).attr("src", passedAlbums[i].ImageLink);
+                        $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
+                        break;
+                    case 1:
+                        $('.panel-passed > .next').children().eq(0).attr("src", passedAlbums[i].ImageLink);
+                        break;
+                    case 2:
+                        $('.panel-passed > .nnext').children().eq(0).attr("src", passedAlbums[i].ImageLink);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $('.panel-liked > .get-next > button').on("click", function ()
+            {
+                $('.panel-liked > .get-next > button').attr("disabled", true);
+
+                if (likedAlbumIndex < likedAlbums.length - 1)
+                {
+                    if (likedAlbumIndex < likedAlbums.length - 3)
+                    {
+                        GetNext($('.panel-liked').children('.img-album'), likedAlbums[likedAlbumIndex + 3]);
+                    }
+                    else
+                    {
+                        GetNext($('.panel-liked').children('.img-album'));
+                    }
                     likedAlbumIndex++;
+                    $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
                 }
-            }
-        }
 
-        function GetPrev(albums, data, passed) {
-            var start;
-            if (albums.eq(albums.length - 2).children().length == 0) {
-                albums.eq(albums.length - 2).append('<img class="img-responsive" alt="Album Image">');
-                start = albums.length - 2;
-            } else if (albums.eq(albums.length - 1).children().length == 0) {
-                albums.eq(albums.length - 1).append('<img class="img-responsive" alt="Album Image">');
-                start = albums.length - 1;
-            } else {
-                start = albums.length - 1;
-            }
-            for (var i = start; i > 0; i--) {
-                albums.eq(i).children().eq(0).attr("src", albums.eq(i - 1).children().eq(0).attr("src"));
-                albums.eq(i).children().eq(0).attr("name", albums.eq(i - 1).children().eq(0).attr("name"));
-            }
-            albums.eq(0).children().eq(0).attr("src", data.imageLink);
-            albums.eq(0).children().eq(0).attr("name", data.uri);
+                $('.panel-liked > .get-next > button').attr("disabled", false);
+            });
 
-            if (passed == 1) {
-                passedAlbumIndex--;
-            } else {
-                likedAlbumIndex--;
-            }
-        }
+            $('.panel-liked > .get-prev > button').on("click", function ()
+            {
+                $('.panel-liked > .get-prev > button').attr("disabled", true);
 
-        function GetPrev_Null(albums, passed) {
-            if (albums.eq(1).children().length > 0) {
-                for (var i = albums.length - 1; i > 0; i--) {
-                    if (albums.eq(i - 1).children().length > 0) {
-                        albums.eq(i).children().eq(0).attr("src", albums.eq(i - 1).children().eq(0).attr("src"));
-                        albums.eq(i).children().eq(0).attr("name", albums.eq(i - 1).children().eq(0).attr("name"));
-                    } else {
-                        albums.eq(i).children().eq(0).remove();
+                if (likedAlbumIndex > 0)
+                {
+                    if (likedAlbumIndex > 2)
+                    {
+                        GetPrev($('.panel-liked').children('.img-album'), likedAlbums[likedAlbumIndex - 3]);
                     }
-                }
-                albums.eq(0).children().eq(0).remove();
-
-                if (passed == 1) {
-                    passedAlbumIndex--;
-                } else {
+                    else
+                    {
+                        GetPrev($('.panel-liked').children('.img-album'));
+                    }
                     likedAlbumIndex--;
+                    $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
                 }
-            }
-        }
 
-        $(function () {
-            $('#likedAlbumsViewerBody > .get-next > button').on("click", function () {
-                $('#likedAlbumsViewerBody > .get-next > button').attr("disabled", true);
-                $.post(
-                    "@Url.Action("GetAlbum", "Apollo")",
-                    { index: likedAlbumIndex + 3, table: 0 },
-                    function (data) {
-                        if (data) {
-                            GetNext($('#likedAlbumsViewerBody').children('.img-album'), data, 0);
-                        } else {
-                            GetNext_Null($('#likedAlbumsViewerBody').children('.img-album'), 0);
-                        }
-                        $('#likedAlbumsViewerBody > .get-next > button').attr("disabled", false);
-                    }).fail(function () {
-                        $('#likedAlbumsViewerBody > .get-next > button').attr("disabled", false);
-                    });
+                $('.panel-liked > .get-prev > button').attr("disabled", false);
             });
 
-            $('#likedAlbumsViewerBody > .get-prev > button').on("click", function () {
-                $('#likedAlbumsViewerBody > .get-prev > button').attr("disabled", true);
-                $.post(
-                    "@Url.Action("GetAlbum", "Apollo")",
-                    { index: likedAlbumIndex - 3, table: 0 },
-                    function (data) {
-                        if (data) {
-                            GetPrev($('#likedAlbumsViewerBody').children('.img-album'), data, 0);
-                        } else {
-                            GetPrev_Null($('#likedAlbumsViewerBody').children('.img-album'), 0);
-                        }
-                        $('#likedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
-                    }).fail(function () {
-                        $('#likedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
-                    });
+            $('.panel-passed > .get-next > button').on("click", function ()
+            {
+                $('.panel-passed > .get-next > button').attr("disabled", true);
+
+                if (passedAlbumIndex < passedAlbums.length - 1)
+                {
+                    if (passedAlbumIndex < passedAlbums.length - 3)
+                    {
+                        GetNext($('.panel-passed').children('.img-album'), passedAlbums[passedAlbumIndex + 3]);
+                    }
+                    else
+                    {
+                        GetNext($('.panel-passed').children('.img-album'));
+                    }
+                    passedAlbumIndex++;
+                    $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
+                }
+
+                $('.panel-passed > .get-next > button').attr("disabled", false);
             });
 
-            $('#passedAlbumsViewerBody > .get-next > button').on("click", function () {
-                $('#passedAlbumsViewerBody > .get-next > button').attr("disabled", true);
-                $.post(
-                    "@Url.Action("GetAlbum", "Apollo")",
-                    { index: passedAlbumIndex + 3, table: 1 },
-                    function (data) {
-                        if (data) {
-                            GetNext($('#passedAlbumsViewerBody').children('.img-album'), data, 1);
-                        } else {
-                            GetNext_Null($('#passedAlbumsViewerBody').children('.img-album'), 1);
-                        }
-                        $('#passedAlbumsViewerBody > .get-next > button').attr("disabled", false);
-                    }).fail(function () {
-                        $('#passedAlbumsViewerBody > .get-next > button').attr("disabled", false);
-                    });
+            $('.panel-passed > .get-prev > button').on("click", function ()
+            {
+                $('.panel-passed > .get-prev > button').attr("disabled", true);
+
+                if (passedAlbumIndex > 0)
+                {
+                    if (passedAlbumIndex > 2)
+                    {
+                        GetPrev($('.panel-passed').children('.img-album'), passedAlbums[passedAlbumIndex - 3]);
+                    }
+                    else
+                    {
+                        GetPrev($('.panel-passed').children('.img-album'));
+                    }
+                    passedAlbumIndex--;
+                    $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
+                }
+
+                $('.panel-passed > .get-prev > button').attr("disabled", false);
             });
 
-            $('#passedAlbumsViewerBody > .get-prev > button').on("click", function () {
-                $('#passedAlbumsViewerBody > .get-prev > button').attr("disabled", true);
-                $.post(
-                    "@Url.Action("GetAlbum", "Apollo")",
-                    { index: passedAlbumIndex - 3, table: 1 },
-                    function (data) {
-                        if (data) {
-                            GetPrev($('#passedAlbumsViewerBody').children('.img-album'), data, 1);
-                        } else {
-                            GetPrev_Null($('#passedAlbumsViewerBody').children('.img-album'), 1);
-                        }
-                        $('#passedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
-                    }).fail(function () {
-                        $('#passedAlbumsViewerBody > .get-prev > button').attr("disabled", false);
-                    });
+            $('.panel-liked > .album-controls > button').on("click", function ()
+            {
+                window.location.replace('@Url.Action("RemoveListenedAlbum", "Apollo")?uri=' + likedAlbums[likedAlbumIndex].Uri + '&table=0');
+            });
+
+            $('.panel-passed > .album-controls > button').on("click", function ()
+            {
+                window.location.replace('@Url.Action("RemoveListenedAlbum", "Apollo")?uri=' + passedAlbums[passedAlbumIndex].Uri + '&table=1');
             });
         });
 
-        $('#albumSeedText').autocomplete({
+        $('input').autocomplete({
             autoFocus: false,
             delay: 500,
             minLength: 0,
@@ -254,10 +286,11 @@
                 );
             },
             select: function (event, ui) {
-                window.location.replace('@Url.Action("AddAlbumSeed", "Apollo")?Uri=' + ui.item.Uri);
+                window.location.replace('@Url.Action("AddAlbumSeed", "Apollo")?uri=' + ui.item.Uri);
             }
         }).autocomplete("instance")._renderItem = function (ul, item) {
             return $("<li class='selector'><div><img src='" + item.Img + "' name='" + item.Uri + "' class='img-responsive img-search'/><span>" + item.Value + "</span></div></li>").appendTo(ul);
         };
+
     </script>
 }

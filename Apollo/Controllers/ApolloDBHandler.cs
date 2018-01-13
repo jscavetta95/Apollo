@@ -325,7 +325,7 @@ namespace Apollo.Controllers {
         public bool RemoveAlbumFromBridge(string userID, string albumURI, BridgingTables table)
         {
             // Setup SQL query.
-            string sql = $"DELETE FROM {table.ToString().ToLower()} WHERE user_id = @userID AND albumURI = @albumURI";
+            string sql = $"DELETE FROM {table.ToString().ToLower()} WHERE user_id = @userID AND album_id = (SELECT album_id FROM albums WHERE albumURI = @albumURI)";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
             query.Parameters.AddWithValue("@userID", userID);
             query.Parameters.AddWithValue("@albumURI", albumURI);

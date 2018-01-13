@@ -17,13 +17,10 @@
 
         </div>
         <div class="selected img-album">
-            <img class="img-responsive">
         </div>
         <div class="next img-album">
-            <img class="img-responsive">
         </div>
         <div class="nnext img-album">
-            <img class="img-responsive">
         </div>
         <div class="get-next">
             <button class="btn btn-info btn-albums ">&#10097</button>
@@ -46,13 +43,10 @@
 
         </div>
         <div class="selected img-album">
-            <img class="img-responsive">
         </div>
         <div class="next img-album">
-            <img class="img-responsive">
         </div>
         <div class="nnext img-album">
-            <img class="img-responsive">
         </div>
         <div class="get-next">
             <button class="btn btn-info btn-albums ">&#10097</button>
@@ -143,13 +137,16 @@
                 switch (i)
                 {
                     case 0:
+                        $('.panel-liked > .selected').append('<img class="img-responsive">');
                         $('.panel-liked > .selected').children().eq(0).attr("src", likedAlbums[i].ImageLink);
                         $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
                         break;
                     case 1:
+                        $('.panel-liked > .next').append('<img class="img-responsive">');
                         $('.panel-liked > .next').children().eq(0).attr("src", likedAlbums[i].ImageLink);
                         break;
                     case 2:
+                        $('.panel-liked > .nnext').append('<img class="img-responsive">');
                         $('.panel-liked > .nnext').children().eq(0).attr("src", likedAlbums[i].ImageLink);
                         break;
                     default:
@@ -162,13 +159,16 @@
                 switch (i)
                 {
                     case 0:
+                        $('.panel-passed > .selected').append('<img class="img-responsive">');
                         $('.panel-passed > .selected').children().eq(0).attr("src", passedAlbums[i].ImageLink);
                         $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
                         break;
                     case 1:
+                        $('.panel-passed > .next').append('<img class="img-responsive">');
                         $('.panel-passed > .next').children().eq(0).attr("src", passedAlbums[i].ImageLink);
                         break;
                     case 2:
+                        $('.panel-passed > .nnext').append('<img class="img-responsive">');
                         $('.panel-passed > .nnext').children().eq(0).attr("src", passedAlbums[i].ImageLink);
                         break;
                     default:

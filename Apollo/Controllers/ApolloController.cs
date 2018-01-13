@@ -261,6 +261,9 @@ namespace Apollo.Controllers {
                     // User doesn't exists, create the new user.
                     Session[LOGGED_IN_USERID_SESSION] = dbHandler.Register(regUsername, regPassword, regEmail);
                     Session[LOGGED_IN_USERNAME_SESSION] = regUsername;
+
+                    RefreshSpotifyToken();
+
                     return Redirect("Albums");
                 }
             }

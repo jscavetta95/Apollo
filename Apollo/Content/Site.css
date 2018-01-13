@@ -74,7 +74,7 @@ textarea {
 
     .panel-primary > .panel-heading {
         width: 85%;
-        margin: 0px auto;
+        margin: 0 auto;
         background: linear-gradient(to right, #ecedef, #6dbb89, #ecedef);
         border: none;
         font-family: Circular, Helvetica, Arial, sans-serif;

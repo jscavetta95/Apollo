@@ -315,6 +315,11 @@ footer
     background-color: #4f5253;
 }
 
+.albums .form-control 
+{
+    display: block;
+}
+
 /*#endregion*/
 
 /*#region Discover*/

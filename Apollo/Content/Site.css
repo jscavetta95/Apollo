@@ -1,0 +1,423 @@
+﻿/*#region General*/
+
+body
+{
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+footer > p
+{
+    margin-left: 15px;
+}
+
+.center
+{
+    margin: auto;
+    text-align: center;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt
+{
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea
+{
+    max-width: 280px;
+}
+
+.form-control
+{
+    display: inline-block;
+    width: 30%;
+}
+
+h4 {
+    display: inline-block;
+}
+
+.container
+{
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.text-title
+{
+    font-size: medium;
+}
+
+footer
+{
+    background-color: #e0e0e0;
+}
+
+/*#endregion*/
+
+/*#region NavBar*/
+@media (min-width: 768px)
+{
+    .container > .navbar-header
+    {
+        margin-left: 15%;
+    }
+
+    .navbar-nav
+    {
+        float: right;
+        margin-right: 10%;
+    }
+}
+
+@media (max-width: 768px)
+{
+    .container > .navbar-header
+    {
+        margin: auto;
+    }
+}
+
+.navbar
+{
+    margin: 0;
+}
+
+.navbar-brand
+{
+    font-size: 30px;
+}
+
+.navbar-link
+{
+    font-size: 16px;
+    float: right;
+}
+
+/*#endregion*/
+
+/*#region Index*/
+
+.index .link
+{
+    color: #75c1ed;
+}
+
+.index a
+{
+    color: #fff;
+}
+
+    .index a:hover
+    {
+        text-decoration: none;
+    }
+
+.panel
+{
+    border: none;
+    padding: 0;
+}
+
+.panel-index
+{
+    margin: 20px auto;
+    width: 60%;
+    background-color: #4f5253;
+    color: #fff;
+    font-size: 18px;
+}
+
+.panel-heading
+{
+    background: linear-gradient(to right, #4f5253, #ecedef, #4f5253);
+    width: 90%;
+    margin: 0 auto;
+    color: #4f5253;
+    font-family: Circular, Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    border-radius: 0;
+    border-style: none;
+    outline: none;
+}
+
+/*#endregion*/
+
+/*#region Account*/
+
+.account h5 {
+    display: inline;
+}
+
+/*#endregion*/
+
+/*#region Login*/
+
+.panel-login, .panel-register
+{
+    margin: 20px auto;
+    padding: 25px 0 10px 0;
+    width: 70%;
+    background-color: #4f5253;
+    color: #fff;
+    font-size: 16px;
+    min-width:550px;
+}
+
+.login .btn {
+    width: 200px;
+}
+
+.panel-danger {
+    width: 70%;
+    margin: auto;
+    background-color: #e67f7f;
+}
+
+/*#endregion*/
+
+/*#region Albums*/
+
+.img-album, .get-next, .get-prev
+{
+    display: inline-block;
+    position: relative;
+}
+
+.img-album > img
+{
+    border: 3px ridge dimgray;
+}
+
+.get-next, .get-prev
+{
+    height: 250px;
+    margin: auto 45px auto 10px;
+    z-index: 8;
+}
+
+.selected
+{
+    height: 250px;
+    width: 250px;
+    margin: auto;
+    z-index: 10;
+}
+
+.next
+{
+    height: 225px;
+    width: 225px;
+    margin-bottom: 12.5px;
+    margin-left: -150px;
+    z-index: 9;
+}
+
+.prev
+{
+    height: 225px;
+    width: 225px;
+    margin-bottom: 12.5px;
+    margin-right: -150px;
+    z-index: 9;
+}
+
+.nnext
+{
+    height: 200px;
+    width: 200px;
+    margin-bottom: 25px;
+    margin-left: -175px;
+    z-index: 8;
+}
+
+.pprev
+{
+    height: 200px;
+    width: 200px;
+    margin-bottom: 25px;
+    margin-right: -175px;
+    z-index: 8;
+}
+
+.btn-albums
+{
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.btn-remove
+{
+    text-align: center;
+    font-size: large;
+    height: 50px;
+    width: 50px;
+    background-color: #ce2e2e;
+    border-radius: 25px;
+    border: 2px solid dimgray;
+}
+
+.panel-liked, .panel-passed
+{
+    padding: 25px 0;
+    background-color: #4f5253;
+    width: 90%;
+    float: none;
+    display: inline-block;
+    min-width: 585px;
+    padding: 0 0 15px 0;
+    margin: 15px 0 0 0;
+}
+
+    .panel-liked > .panel-heading, .panel-passed > .panel-heading
+    {
+        margin-bottom: 20px;
+    }
+
+.img-search
+{
+    height: 300px;
+    width: 300px;
+}
+
+.selector
+{
+    float: left;
+}
+
+.albums input
+{
+    top: 20%;
+    left: 10%;
+    width: 400px;
+}
+
+.albums iframe
+{
+    margin: 5px 0 5px 4px;
+}
+
+.panel-search
+{
+    margin: 14px auto;
+    height: 350px;
+    width: 95%;
+    display: inline-block;
+    float: none;
+    background-color: #4f5253;
+}
+
+/*#endregion*/
+
+/*#region Discover*/
+.img-selectable
+{
+    padding: 8px;
+}
+
+.discover iframe
+{
+    height: 100%
+}
+
+.discover .panel-player
+{
+    width: 315px;
+    height: 685px;
+    padding-right: 15px;
+    display: inline-block;
+}
+
+.discover .panel-albums
+{
+    width: 600px;
+    height: 700px;
+    display: inline-block;
+}
+
+.discover .panel-heading
+{
+    width: 100%;
+    background: #ecedef;
+}
+
+.btn-discover
+{
+    width: 45%;
+    margin: 10px 2px;
+}
+
+.btn-like
+{
+    background-color: #6dbb89;
+    color: #1e1e1e;
+}
+
+    .btn-like:hover
+    {
+        background-color: #17bf53;
+        color: #1e1e1e;
+    }
+
+.btn-pass
+{
+    background-color: #e15c5c;
+    color: #1e1e1e;
+}
+
+    .btn-pass:hover
+    {
+        background-color: #e54a4a;
+        color: #1e1e1e;
+    }
+
+.panel-default
+{
+    margin: 14px 0;
+    height: 320px;
+    width: 200px;
+}
+
+    .panel-default > .panel-heading
+    {
+        min-height: 22%;
+    }
+
+    .panel-default > .panel-body
+    {
+        min-height: 78%;
+    }
+
+/*#endregion*/
+
+/*#region Spurify*/
+
+.progress
+{
+    height: 25px;
+}
+
+.progress-bar
+{
+    background-color: #1ED760;
+}
+
+td
+{
+    min-width: 110px;
+}
+
+.fa
+{
+    font-size: 15px;
+}
+
+/*#endregion*/

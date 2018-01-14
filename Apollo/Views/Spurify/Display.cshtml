@@ -1,0 +1,157 @@
+﻿@using SpotifyAPI.Web.Models;
+@model List<SimplePlaylist>;
+@{
+    ViewBag.Title = "Display Playlist";
+}
+
+<div class="row">
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="col-lg-3">
+        <!-- Sidebar Header -->
+        <h2>Choose a Playlist</h2>
+        <h3>Playlist</h3>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" id="playlistSelect" type="button" data-toggle="dropdown">
+                Select Playlist
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                @for (int i = 0; i < Model.Playlists.Count; i++) {
+                    <li><a href="#" class="playlistSelection" id="@i">@Model.Playlists[i].Name</a></li>
+                }
+            </ul>
+        </div>
+
+        <br />
+
+        <h3>Last.fm Username</h3>
+        <div class="form-group">
+            <input type="text" class="form-control" id="usr">
+        </div>
+
+        <br />
+
+        <button type="button" class="btn btn-primary disabled" id="display">Display Playlist</button>
+        <i id="processing" class="fa fa-spinner fa-spin" style="display: none;"></i>
+    </div>
+
+    <div id="displayBody" class="col-lg-9">
+        <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+            <i class="glyphicon glyphicon-align-left"></i>
+        </button>
+
+        <table class='table' id='trackTable'>
+            <thead>
+                <tr>
+                    <th>Song Title</th>
+                    <th>Artist</th>
+                    <th>Play Count</th>
+                    <th></th>
+                </tr>
+            </thead> 
+        </table>
+</div>
+
+</div>
+
+@section scripts {
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
+    <script>
+
+        $().ready(function() {
+            $("#trackTable").DataTable();
+        });
+
+        $("#sidebarCollapse").click(function () {
+            if ($("#sidebar").is(":hidden")) {
+                $("#sidebar").show("fast");
+                $("#displayBody").removeClass("col-lg-12");
+                $("#displayBody").addClass("col-lg-9");
+            } else {
+                $("#sidebar").hide("fast");
+                $("#displayBody").removeClass("col-lg-9");
+                $("#displayBody").addClass("col-lg-12");
+            }
+        });
+
+        $(".playlistSelection").click(function () {
+            $("#playlistSelect:first-child").html($(this).text() + ' <span class="caret"></span>');
+            if ($("#display").hasClass("disabled")) {
+                $("#display").removeClass("disabled");
+                $("#display").addClass("active");
+            }
+        });
+
+        $(".durationSelection").click(function () {
+            $("#durationSelect:first-child").html($(this).text() + ' <span class="caret"></span>');
+        });
+
+        $("#display").click(function () {
+
+            // Show spinner
+            $("#processing").show();
+
+            // Get last.fm username
+            var username = $("#usr").val().trim();
+
+            // Get Playlist object
+            var playlistArray = JSON.parse('@Html.Raw(Json.Encode(Model.Playlists))');
+            var playlist;
+            var done = false;
+            for (var i = 0; !done && i < @Model.Playlists.Count; i++) {
+                if ($("#playlistSelect:first-child").text().trim() === $("#" + i).html().trim()) {
+                    playlist = JSON.stringify(playlistArray[i]);
+                    done = true;
+                }
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetPlaycountsForPlaylistFromLastFM", "Spurify")",
+                data: { user: username, playlistJSON: playlist },
+                dataType: 'json'
+            }).done(function (data) {
+                displayTracks(data["tracks"]);
+
+                // Hide spinner
+                $("#processing").hide();
+            });
+
+        });
+
+        function displayTracks(tracks) {
+            $("#trackTable_wrapper").remove();
+            var tableHTML = "<table class='table' id='trackTable'><thead><tr><th>Song Title</th><th>Artist</th><th>Play Count</th><th></th></tr></thead>";
+            tableHTML += "<tbody>";
+            for (var i = 0; i < tracks.length; i++) {
+                tableHTML += "<tr><td>" + tracks[i].Name + "</td><td>" + tracks[i].Artist + "</td><td>" + tracks[i].PlayCount + "</td><td><button type='button' class='btn btn-warning delete' id='" + tracks[i].Uri + "'>Delete</button></td></tr>";
+            }
+            tableHTML += "</tbody></table>";
+
+            $("#sidebarCollapse").after(tableHTML);
+            $("#trackTable").DataTable();
+        }
+
+        $("#displayBody").on('click', '.delete', function () {
+            var uri = $(this).attr('id');
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteTrackFromPlaylist", "Spurify")",
+                data: { trackUri: uri },
+                dataType: 'json'
+            }).done(function (data) {
+                var selector = "#" + escapeChars(uri);
+                var table = $('#trackTable').DataTable();
+                table.row($(selector).parent().parent()).remove().draw();
+            });
+        });
+
+        function escapeChars(stringToEscape) {
+            return stringToEscape.replace(/:/g, "\\:");
+        }
+
+    </script>
+}

@@ -1,0 +1,298 @@
+﻿@using Apollo.Models.Apollo
+@using Apollo.Controllers
+@model Dictionary<ApolloDBHandler.BridgingTables,List<Album>>
+@{
+    ViewBag.Title = "Albums";
+}
+
+<div class="container text-center albums">
+    <div class="col-lg-6 col-sm-12 text-center ">
+        <div class="panel-liked">
+            <h3 class="panel-heading">Liked Albums</h3>
+            <div class="get-prev">
+                <button class="btn btn-info btn-albums ">&#10096</button>
+            </div>
+            <div class="pprev img-album">
+            </div>
+            <div class="prev img-album">
+            </div>
+            <div class="selected img-album">
+            </div>
+            <div class="next img-album">
+            </div>
+            <div class="nnext img-album">
+            </div>
+            <div class="get-next">
+                <button class="btn btn-info btn-albums ">&#10097</button>
+            </div>
+            <div class="album-controls">
+                <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
+                <br />
+                <button class="btn btn-remove">&#10006</button>
+            </div>
+        </div>    
+    </div>
+
+    <div class="col-lg-6 col-sm-12 text-center ">
+        <div class="panel-passed">
+            <h3 class="panel-heading">Passed Albums</h3>
+            <div class="get-prev">
+                <button class="btn btn-info btn-albums ">&#10096</button>
+            </div>
+            <div class="pprev img-album">
+            </div>
+            <div class="prev img-album">
+            </div>
+            <div class="selected img-album">
+            </div>
+            <div class="next img-album">
+            </div>
+            <div class="nnext img-album">
+            </div>
+            <div class="get-next">
+                <button class="btn btn-info btn-albums ">&#10097</button>
+            </div>
+            <div class="album-controls">
+                <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
+                <br />
+                <button class="btn btn-remove">&#10006</button>
+            </div> 
+        </div>  
+    </div>
+
+    <div class="col-lg-12 col-sm-12 panel-search">
+        <h3 class="panel-heading">Add Album Seed</h3>
+        <input name="album-search" type="search" class="ui-autocomplete form-control" placeholder="Search for an Album" maxlength="50">
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var url = "https://open.spotify.com/embed?uri=";
+
+        var likedAlbumIndex = 0;
+        var passedAlbumIndex = 0;
+
+        var likedAlbums = @Html.Raw(Json.Encode(Model[ApolloDBHandler.BridgingTables.LIKED_ALBUMS]));
+        var passedAlbums = @Html.Raw(Json.Encode(Model[ApolloDBHandler.BridgingTables.PASSED_ALBUMS]));
+
+        function GetNext(divs, newAlbum)
+        {
+            for (var i = 0; i < divs.length - 1; i++)
+            {
+                if (divs.eq(i + 1).children().length > 0)
+                {
+                    if (divs.eq(i).children().length == 0)
+                    {
+                        divs.eq(i).append('<img class="img-responsive">');
+                    }
+                    divs.eq(i).children().eq(0).attr("src", divs.eq(i + 1).children().eq(0).attr("src"));
+                }
+                else
+                {
+                    divs.eq(i).children().eq(0).remove();
+                }
+            }
+
+            if (newAlbum)
+            {
+                divs.eq(divs.length - 1).children().eq(0).attr("src", newAlbum.ImageLink);
+            }
+            else
+            {
+                divs.eq(divs.length - 1).children().eq(0).remove();
+            }
+        }
+
+        function GetPrev(divs, newAlbum)
+        {
+            for (var i = divs.length - 1; i > 0; i--)
+            {
+                if (divs.eq(i - 1).children().length > 0)
+                {
+                    if (divs.eq(i).children().length == 0)
+                    {
+                        divs.eq(i).append('<img class="img-responsive">');
+                    }
+                    divs.eq(i).children().eq(0).attr("src", divs.eq(i - 1).children().eq(0).attr("src"));
+                }
+                else
+                {
+                    divs.eq(i).children().eq(0).remove();
+                }
+            }
+
+            if (newAlbum)
+            {
+                divs.eq(0).children().eq(0).attr("src", newAlbum.ImageLink);
+            }
+            else
+            {
+                divs.eq(0).children().eq(0).remove();
+            }
+        }
+
+        $(function ()
+        {
+            for (var i = 0; i < 3 && i < likedAlbums.length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        $('.panel-liked > .selected').append('<img class="img-responsive">');
+                        $('.panel-liked > .selected').children().eq(0).attr("src", likedAlbums[i].ImageLink);
+                        $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
+                        break;
+                    case 1:
+                        $('.panel-liked > .next').append('<img class="img-responsive">');
+                        $('.panel-liked > .next').children().eq(0).attr("src", likedAlbums[i].ImageLink);
+                        break;
+                    case 2:
+                        $('.panel-liked > .nnext').append('<img class="img-responsive">');
+                        $('.panel-liked > .nnext').children().eq(0).attr("src", likedAlbums[i].ImageLink);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            for (var i = 0; i < 3 && i < passedAlbums.length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        $('.panel-passed > .selected').append('<img class="img-responsive">');
+                        $('.panel-passed > .selected').children().eq(0).attr("src", passedAlbums[i].ImageLink);
+                        $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
+                        break;
+                    case 1:
+                        $('.panel-passed > .next').append('<img class="img-responsive">');
+                        $('.panel-passed > .next').children().eq(0).attr("src", passedAlbums[i].ImageLink);
+                        break;
+                    case 2:
+                        $('.panel-passed > .nnext').append('<img class="img-responsive">');
+                        $('.panel-passed > .nnext').children().eq(0).attr("src", passedAlbums[i].ImageLink);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $('.panel-liked > .get-next > button').on("click", function ()
+            {
+                $('.panel-liked > .get-next > button').attr("disabled", true);
+
+                if (likedAlbumIndex < likedAlbums.length - 1)
+                {
+                    if (likedAlbumIndex < likedAlbums.length - 3)
+                    {
+                        GetNext($('.panel-liked').children('.img-album'), likedAlbums[likedAlbumIndex + 3]);
+                    }
+                    else
+                    {
+                        GetNext($('.panel-liked').children('.img-album'));
+                    }
+                    likedAlbumIndex++;
+                    $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
+                }
+
+                $('.panel-liked > .get-next > button').attr("disabled", false);
+            });
+
+            $('.panel-liked > .get-prev > button').on("click", function ()
+            {
+                $('.panel-liked > .get-prev > button').attr("disabled", true);
+
+                if (likedAlbumIndex > 0)
+                {
+                    if (likedAlbumIndex > 2)
+                    {
+                        GetPrev($('.panel-liked').children('.img-album'), likedAlbums[likedAlbumIndex - 3]);
+                    }
+                    else
+                    {
+                        GetPrev($('.panel-liked').children('.img-album'));
+                    }
+                    likedAlbumIndex--;
+                    $('.panel-liked > .album-controls > iframe').attr("src", url.concat(likedAlbums[likedAlbumIndex].Uri));
+                }
+
+                $('.panel-liked > .get-prev > button').attr("disabled", false);
+            });
+
+            $('.panel-passed > .get-next > button').on("click", function ()
+            {
+                $('.panel-passed > .get-next > button').attr("disabled", true);
+
+                if (passedAlbumIndex < passedAlbums.length - 1)
+                {
+                    if (passedAlbumIndex < passedAlbums.length - 3)
+                    {
+                        GetNext($('.panel-passed').children('.img-album'), passedAlbums[passedAlbumIndex + 3]);
+                    }
+                    else
+                    {
+                        GetNext($('.panel-passed').children('.img-album'));
+                    }
+                    passedAlbumIndex++;
+                    $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
+                }
+
+                $('.panel-passed > .get-next > button').attr("disabled", false);
+            });
+
+            $('.panel-passed > .get-prev > button').on("click", function ()
+            {
+                $('.panel-passed > .get-prev > button').attr("disabled", true);
+
+                if (passedAlbumIndex > 0)
+                {
+                    if (passedAlbumIndex > 2)
+                    {
+                        GetPrev($('.panel-passed').children('.img-album'), passedAlbums[passedAlbumIndex - 3]);
+                    }
+                    else
+                    {
+                        GetPrev($('.panel-passed').children('.img-album'));
+                    }
+                    passedAlbumIndex--;
+                    $('.panel-passed > .album-controls > iframe').attr("src", url.concat(passedAlbums[passedAlbumIndex].Uri));
+                }
+
+                $('.panel-passed > .get-prev > button').attr("disabled", false);
+            });
+
+            $('.panel-liked > .album-controls > button').on("click", function ()
+            {
+                window.location.replace('@Url.Action("RemoveListenedAlbum", "Apollo")?uri=' + likedAlbums[likedAlbumIndex].Uri + '&table=0');
+            });
+
+            $('.panel-passed > .album-controls > button').on("click", function ()
+            {
+                window.location.replace('@Url.Action("RemoveListenedAlbum", "Apollo")?uri=' + passedAlbums[passedAlbumIndex].Uri + '&table=1');
+            });
+        });
+
+        $('input').autocomplete({
+            autoFocus: false,
+            delay: 500,
+            minLength: 0,
+            classes: { "ui-autocomplete": "highlight" },
+            source: function (request, response) {
+                $.post(
+                    "@Url.Action("SearchForAlbum", "Apollo")",
+                    { searchInput: request.term },
+                    function (data) {
+                        response(data);
+                    }
+                );
+            },
+            select: function (event, ui) {
+                window.location.replace('@Url.Action("AddAlbumSeed", "Apollo")?uri=' + ui.item.Uri);
+            }
+        }).autocomplete("instance")._renderItem = function (ul, item) {
+            return $("<li class='selector'><div><img src='" + item.Img + "' name='" + item.Uri + "' class='img-responsive img-search'/><span>" + item.Value + "</span></div></li>").appendTo(ul);
+        };
+
+    </script>
+}

@@ -5,62 +5,64 @@
     ViewBag.Title = "Albums";
 }
 
-<div class="container albums">
-    <div class="col-lg-6 col-sm-12 text-center panel-liked">
-        <div class="get-prev">
-            <button class="btn btn-info btn-albums ">&#10096</button>
-        </div>
-        <div class="pprev img-album">
-
-        </div>
-        <div class="prev img-album">
-
-        </div>
-        <div class="selected img-album">
-        </div>
-        <div class="next img-album">
-        </div>
-        <div class="nnext img-album">
-        </div>
-        <div class="get-next">
-            <button class="btn btn-info btn-albums ">&#10097</button>
-        </div>
-        <div class="album-controls">
-            <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
-            <br />
-            <button class="btn btn-remove">&#10006</button>
-        </div>
+<div class="container text-center albums">
+    <div class="col-lg-6 col-sm-12 text-center ">
+        <div class="panel-liked">
+            <h3 class="panel-heading">Liked Albums</h3>
+            <div class="get-prev">
+                <button class="btn btn-info btn-albums ">&#10096</button>
+            </div>
+            <div class="pprev img-album">
+            </div>
+            <div class="prev img-album">
+            </div>
+            <div class="selected img-album">
+            </div>
+            <div class="next img-album">
+            </div>
+            <div class="nnext img-album">
+            </div>
+            <div class="get-next">
+                <button class="btn btn-info btn-albums ">&#10097</button>
+            </div>
+            <div class="album-controls">
+                <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
+                <br />
+                <button class="btn btn-remove">&#10006</button>
+            </div>
+        </div>    
     </div>
 
-    <div class="col-lg-6 col-sm-12 text-center panel-passed">
-        <div class="get-prev">
-            <button class="btn btn-info btn-albums ">&#10096</button>
-        </div>
-        <div class="pprev img-album">
-
-        </div>
-        <div class="prev img-album">
-
-        </div>
-        <div class="selected img-album">
-        </div>
-        <div class="next img-album">
-        </div>
-        <div class="nnext img-album">
-        </div>
-        <div class="get-next">
-            <button class="btn btn-info btn-albums ">&#10097</button>
-        </div>
-        <div class="album-controls">
-            <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
-            <br />
-            <button class="btn btn-remove">&#10006</button>
-        </div>   
+    <div class="col-lg-6 col-sm-12 text-center ">
+        <div class="panel-passed">
+            <h3 class="panel-heading">Passed Albums</h3>
+            <div class="get-prev">
+                <button class="btn btn-info btn-albums ">&#10096</button>
+            </div>
+            <div class="pprev img-album">
+            </div>
+            <div class="prev img-album">
+            </div>
+            <div class="selected img-album">
+            </div>
+            <div class="next img-album">
+            </div>
+            <div class="nnext img-album">
+            </div>
+            <div class="get-next">
+                <button class="btn btn-info btn-albums ">&#10097</button>
+            </div>
+            <div class="album-controls">
+                <iframe width="250" height="80" frameborder="0" allowtransparency="true"></iframe>
+                <br />
+                <button class="btn btn-remove">&#10006</button>
+            </div> 
+        </div>  
     </div>
 
-    <div class="col-lg-12 col-sm-12">
+    <div class="col-lg-12 col-sm-12 panel-search">
+        <h3 class="panel-heading">Add Album Seed</h3>
         <input name="album-search" type="search" class="ui-autocomplete form-control" placeholder="Search for an Album" maxlength="50">
-        <br /> <br /> <br />
     </div>
 </div>
 

@@ -13,56 +13,38 @@ using Apollo.Models;
 using SpotifyAPI.Web.Models;
 using SpotifyAPI.Web;
 using System.Web.Services;
+using System.Web.Helpers;
 
-namespace Apollo.Controllers {
-    public class ApolloController : Controller {
+namespace Apollo.Controllers
+{
+    public class ApolloController : Controller
+    {
 
-        #region Constants
-        public const string LOGGED_IN_USERNAME_SESSION = "LoggedInUsername";
-        public const string LOGGED_IN_USERID_SESSION = "LoggedInUserID";
-        public const string ERROR_SESSION = "LoginError";
-        public const string SPOTIFY_TOKEN_SESSION = "Token";
-        #endregion
-
-        #region Index
-        public ActionResult Index() {
+        public ActionResult Index()
+        {
             return View();
         }
-        #endregion
 
-        #region Discover
-        public ActionResult Discover() {
-            if (Session[LOGGED_IN_USERNAME_SESSION] == null) {
+        public ActionResult Discover()
+        {
+            if (Session[Constants.LOGGED_IN_USERNAME_SESSION] == null)
+            {
                 return Redirect("Login");
             }
-
-            return View(GetRecommenedAlbums());
-        }
-
-        public ActionResult ProcessAlbum(string albumURI, bool like)
-        {
-            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            try
             {
-                if(like)
-                {
-                    dbHandler.BridgeUserAndAlbum_AlbumURI(Session[LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
-                }
-                else
-                {
-                    dbHandler.BridgeUserAndAlbum_AlbumURI(Session[LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.PASSED_ALBUMS);
-                }
+                return View(GetRecommenedAlbums());
             }
-
-            return Redirect("Discover");
+            catch(Exception)
+            {
+                return Redirect("Albums");
+            }
         }
 
-        /// <summary>
-        /// Gets the recommened albums.
-        /// </summary>
-        /// <returns>A <see cref="List{T}"/> of <see cref="Album"/></returns>
-        private List<Album> GetRecommenedAlbums() {
+        private List<Album> GetRecommenedAlbums()
+        {
             // Get userID from the session.
-            string userID = Session[LOGGED_IN_USERID_SESSION].ToString();
+            string userID = Session[Constants.LOGGED_IN_USERID_SESSION].ToString();
 
             List<Album> recommendedAlbums;
 
@@ -74,8 +56,17 @@ namespace Apollo.Controllers {
                 // If the number of albums is less than 6...
                 if (recommendedAlbums.Count < 6)
                 {
-                    // Get more recommendations.
-                    GetAlbumRecommendations(userID, recommendedAlbums, dbHandler);
+                    // Check if there are any album seeds
+                    List<Album> likedAlbums = dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
+                    if (likedAlbums.Count > 0)
+                    {
+                        // Get more recommendations.
+                        GetAlbumRecommendations(userID, recommendedAlbums, likedAlbums, dbHandler);
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
                 }
             }
 
@@ -83,13 +74,13 @@ namespace Apollo.Controllers {
             return recommendedAlbums;
         }
 
-        private static List<string> GetSortedRelatedArtistsByCount(string userID, SpotifyWebAPI spotify, ApolloDBHandler dbHandler)
+        private static List<string> GetSortedRelatedArtistsByCount(string userID, SpotifyWebAPI spotify, List<Album> likedAlbums)
         {
             // Initialize the counted map that will be used for related artist proportions.
             SortedDictionary<string, int> artistCount = new SortedDictionary<string, int>();
 
             // Get all currently liked albums, and foreach album...
-            foreach (Album likedAlbum in dbHandler.GetAlbumsFromBridge(userID, ApolloDBHandler.BridgingTables.LIKED_ALBUMS))
+            foreach (Album likedAlbum in likedAlbums)
             {
 
                 // Get related artists to the album artist, and foreach related artist...
@@ -113,15 +104,17 @@ namespace Apollo.Controllers {
             return artistCount.Keys.ToList();
         }
 
-        private void GetAlbumRecommendations(string userID, List<Album> recommendedAlbums, ApolloDBHandler dbHandler) {
-            Token token = Session[SPOTIFY_TOKEN_SESSION] as Token;
+        private void GetAlbumRecommendations(string userID, List<Album> recommendedAlbums, List<Album> likeAlbums, ApolloDBHandler dbHandler)
+        {
+            Token token = Session[Constants.APOLLO_SPOTIFY_TOKEN_SESSION] as Token;
             if (token.IsExpired())
             {
                 RefreshSpotifyToken();
             }
 
             // Establish spotify connection.
-            SpotifyWebAPI spotify = new SpotifyWebAPI() {
+            SpotifyWebAPI spotify = new SpotifyWebAPI()
+            {
                 TokenType = token.TokenType,
                 AccessToken = token.AccessToken,
                 UseAuth = true,
@@ -132,13 +125,14 @@ namespace Apollo.Controllers {
             listenedAlbums = dbHandler.GetAllListenedAlbums(userID);
 
             // Get a sorted list of recommend artists.
-            List<string> recommendedArtists = GetSortedRelatedArtistsByCount(userID, spotify, dbHandler);
+            List<string> recommendedArtists = GetSortedRelatedArtistsByCount(userID, spotify, likeAlbums);
 
             // Initialize a list of albums.
             Paging<SimpleAlbum> albumsPaging;
 
             // Foreach artist starting from the most recommended until there are 6 recommended albums...
-            for (int i = 0; recommendedAlbums.Count < 6 && i < recommendedArtists.Count; i++) {
+            for (int i = 0; recommendedAlbums.Count < 6 && i < recommendedArtists.Count; i++)
+            {
                 // Get a page of albums from this artist.
                 albumsPaging = spotify.GetArtistsAlbums(recommendedArtists[i], AlbumType.Album, market: "US");
 
@@ -146,7 +140,8 @@ namespace Apollo.Controllers {
                 Album recommenedAlbum = RecommendAnAlbum(albumsPaging.Items, listenedAlbums, recommendedArtists[i], spotify);
 
                 // If no albums are recommended on first page, try the next.
-                while (recommenedAlbum == null && albumsPaging.HasNextPage()) {
+                while (recommenedAlbum == null && albumsPaging.HasNextPage())
+                {
                     albumsPaging = spotify.GetNextPage(albumsPaging);
                     recommenedAlbum = RecommendAnAlbum(albumsPaging.Items, listenedAlbums, recommendedArtists[i], spotify);
                 }
@@ -200,32 +195,64 @@ namespace Apollo.Controllers {
             }
             return null;
         }
-        #endregion
 
-        #region Login
-        public ActionResult Login() {
-            return View();
+        public ActionResult ProcessAlbum(string albumURI, bool like)
+        {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                if (like)
+                {
+                    dbHandler.BridgeUserAndAlbum_AlbumURI(Session[Constants.LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
+                }
+                else
+                {
+                    dbHandler.BridgeUserAndAlbum_AlbumURI(Session[Constants.LOGGED_IN_USERID_SESSION] as string, albumURI, ApolloDBHandler.BridgingTables.PASSED_ALBUMS);
+                }
+            }
+
+            return Redirect("Discover");
         }
 
-        public ActionResult LoginHandler(string loginUsername, string loginPassword) {
+        public ActionResult Login()
+        {
+            if(Session[Constants.ERROR_SESSION] != null)
+            {
+                return View(model: Session[Constants.ERROR_SESSION].ToString());
+            }
+            else
+            {
+                return View();
+            }
+        }
+
+        public ActionResult LoginHandler(string loginUsername, string loginPassword)
+        {
 
             // Validate forms.
-            if (loginUsername.Length <= 0 || loginPassword.Length <= 0) {
-                Session[ERROR_SESSION] = "All forms must be filled.";
-                return Redirect("Login");
+            if (loginUsername.Length <= 0 || loginPassword.Length <= 0)
+            {
+                Session[Constants.ERROR_SESSION] = "All forms must be filled.";
+                Redirect("Login");
             }
-            if (loginUsername.Length > 20) {
-                Session[ERROR_SESSION] = "Username cannot be greater than 20 characters.";
-                return Redirect("Login");
+            if (loginUsername.Length > 20)
+            {
+                Session[Constants.ERROR_SESSION] = "Username cannot be greater than 20 characters.";
+                Redirect("Login");
             }
-
-            // Hash the password.
-            // TODO: hash the password.
 
             // Login
-            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
-                Session[LOGGED_IN_USERID_SESSION] = dbHandler.Login(loginUsername, loginPassword);
-                Session[LOGGED_IN_USERNAME_SESSION] = loginUsername;
+            try
+            {
+                using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+                {
+                    Session[Constants.LOGGED_IN_USERID_SESSION] = dbHandler.Login(loginUsername, loginPassword);
+                    Session[Constants.LOGGED_IN_USERNAME_SESSION] = loginUsername;
+                }
+            }
+            catch (Exception e)
+            {
+                Session[Constants.ERROR_SESSION] = e.Message;
+                Redirect("Login");
             }
 
             RefreshSpotifyToken();
@@ -233,42 +260,52 @@ namespace Apollo.Controllers {
             return Redirect("Discover");
         }
 
-        public ActionResult RegisterHandler(string regUsername, string regPassword, string regEmail) {
-
+        public ActionResult RegisterHandler(string regUsername, string regPassword, string regEmail)
+        {
             // Validate forms.
-            if (regUsername.Length <= 0 || regPassword.Length <= 0 || regEmail.Length <= 0) {
-                Session[ERROR_SESSION] = "All forms must be filled.";
-                return Redirect("Login");
+            if (regUsername.Length <= 0 || regPassword.Length <= 0 || regEmail.Length <= 0)
+            {
+                Session[Constants.ERROR_SESSION] = "All forms must be filled.";
+                Redirect("Login");
             }
-            if (regUsername.Length > 20) {
-                Session[ERROR_SESSION] = "Username cannot be greater than 20 characters.";
-                return Redirect("Login");
+            if (regUsername.Length > 20)
+            {
+                Session[Constants.ERROR_SESSION] = "Username cannot be greater than 20 characters.";
+                Redirect("Login");
             }
-            if (regEmail.Length > 40) {
-                Session[ERROR_SESSION] = "Email cannot be greater than 40 characters.";
-                return Redirect("Login");
+            if (regEmail.Length > 40)
+            {
+                Session[Constants.ERROR_SESSION] = "Email cannot be greater than 40 characters.";
+                Redirect("Login");
             }
 
             // Check if username already exists.
-            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
-                try {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                try
+                {
                     // Try to get a user_id for the provided username
                     dbHandler.GetUserID(regUsername);
                     // If this was successful, return an error.
-                    Session[ERROR_SESSION] = "Username already exists.";
-                    return Redirect("Login");
-                } catch (Exception) {
+                    Session[Constants.ERROR_SESSION] = "Username already exists.";
+                    Redirect("Login");
+                }
+                catch (Exception)
+                {
                     // User doesn't exists, create the new user.
-                    Session[LOGGED_IN_USERID_SESSION] = dbHandler.Register(regUsername, regPassword, regEmail);
-                    Session[LOGGED_IN_USERNAME_SESSION] = regUsername;
+
+                    // Hash the password.
+                    string hashedPass = Crypto.HashPassword(regPassword);
+
+                    Session[Constants.LOGGED_IN_USERID_SESSION] = dbHandler.Register(regUsername, hashedPass, regEmail);
+                    Session[Constants.LOGGED_IN_USERNAME_SESSION] = regUsername;
 
                     RefreshSpotifyToken();
-
-                    return Redirect("Albums");
                 }
+                return Redirect("Albums");
             }
         }
-        
+
         private void RefreshSpotifyToken()
         {
             // Get spotify authorization token.
@@ -278,41 +315,52 @@ namespace Apollo.Controllers {
                 ClientSecret = SpotifyAPIModel.CLIENT_SECRET
             };
             Token token = auth.DoAuth();
-            Session[SPOTIFY_TOKEN_SESSION] = token;
+            Session[Constants.APOLLO_SPOTIFY_TOKEN_SESSION] = token;
         }
-        #endregion
 
-        #region Account
-        public ActionResult Account() {
-            if (Session[LOGGED_IN_USERNAME_SESSION] == null) {
+        public ActionResult Account()
+        {
+            if (Session[Constants.LOGGED_IN_USERNAME_SESSION] == null)
+            {
                 return Redirect("Login");
-            } else {
+            }
+            else
+            {
                 string email;
-                using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
-                    email = dbHandler.GetEmail(Session[LOGGED_IN_USERID_SESSION] as string);
+                using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+                {
+                    email = dbHandler.GetEmail(Session[Constants.LOGGED_IN_USERID_SESSION] as string);
                 }
 
-                return View(new User() { Username = Session[LOGGED_IN_USERNAME_SESSION] as string, Email = email });
+                return View(new User() { Username = Session[Constants.LOGGED_IN_USERNAME_SESSION] as string, Email = email });
             }
         }
 
-        public bool ChangePassword(string oldPass, string newPass) {
-            //TODO: Hash password
-            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
-                if(dbHandler.ChangePassword(Session[LOGGED_IN_USERID_SESSION] as string, oldPass, newPass)) {
+        public bool ChangePassword(string oldPass, string newPass)
+        {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                if (dbHandler.ChangePassword(Session[Constants.LOGGED_IN_USERID_SESSION] as string, oldPass, newPass))
+                {
                     return true;
-                } else {
+                }
+                else
+                {
                     return false;
                 }
             }
         }
 
-        public bool ChangeEmail(string newEmail) {
-            //TODO: Hash password
-            using (ApolloDBHandler dbHandler = new ApolloDBHandler()) {
-                if (dbHandler.ChangeEmail(Session[LOGGED_IN_USERID_SESSION] as string, newEmail)) {
+        public bool ChangeEmail(string newEmail)
+        {
+            using (ApolloDBHandler dbHandler = new ApolloDBHandler())
+            {
+                if (dbHandler.ChangeEmail(Session[Constants.LOGGED_IN_USERID_SESSION] as string, newEmail))
+                {
                     return true;
-                } else {
+                }
+                else
+                {
                     return false;
                 }
             }
@@ -323,18 +371,16 @@ namespace Apollo.Controllers {
             Session.Abandon();
             return Redirect("Index");
         }
-        #endregion
 
-        #region Album
         public ActionResult Albums()
         {
-            if (Session[LOGGED_IN_USERNAME_SESSION] == null)
+            if (Session[Constants.LOGGED_IN_USERNAME_SESSION] == null)
             {
                 return Redirect("Login");
             }
 
             Dictionary<ApolloDBHandler.BridgingTables, List<Album>> listenedAlbumsDictionary = new Dictionary<ApolloDBHandler.BridgingTables, List<Album>>();
-            string userID = Session[LOGGED_IN_USERID_SESSION].ToString();
+            string userID = Session[Constants.LOGGED_IN_USERID_SESSION].ToString();
 
             using (ApolloDBHandler dbHandler = new ApolloDBHandler())
             {
@@ -350,7 +396,7 @@ namespace Apollo.Controllers {
             {
                 try
                 {
-                    Album album = dbHandler.GetAlbumsFromBridge(Session[LOGGED_IN_USERID_SESSION].ToString(), table, 1, index)[0];
+                    Album album = dbHandler.GetAlbumsFromBridge(Session[Constants.LOGGED_IN_USERID_SESSION].ToString(), table, 1, index)[0];
                     return Json(new { imageLink = album.ImageLink, uri = album.Uri });
                 }
                 catch (Exception)
@@ -362,8 +408,8 @@ namespace Apollo.Controllers {
 
         public ActionResult SearchForAlbum(string searchInput)
         {
-            Token token = Session[SPOTIFY_TOKEN_SESSION] as Token;
-            if(token.IsExpired())
+            Token token = Session[Constants.APOLLO_SPOTIFY_TOKEN_SESSION] as Token;
+            if (token.IsExpired())
             {
                 RefreshSpotifyToken();
             }
@@ -378,7 +424,7 @@ namespace Apollo.Controllers {
 
             List<SearchResult> results = new List<SearchResult>();
             SearchItem searchItem = spotify.SearchItems(searchInput, SearchType.Album);
-            if(searchItem.Albums != null && searchItem.Albums.Total > 0)
+            if (searchItem.Albums != null && searchItem.Albums.Total > 0)
             {
                 searchItem.Albums.Items.ForEach(album => results.Add(new SearchResult(album.Name, album.Images[1].Url, album.Uri)));
             }
@@ -398,7 +444,7 @@ namespace Apollo.Controllers {
                 catch (Exception)
                 {
                     // Establish spotify connection.
-                    Token token = Session[SPOTIFY_TOKEN_SESSION] as Token;
+                    Token token = Session[Constants.APOLLO_SPOTIFY_TOKEN_SESSION] as Token;
                     if (token.IsExpired())
                     {
                         RefreshSpotifyToken();
@@ -420,7 +466,7 @@ namespace Apollo.Controllers {
                 }
                 // Add the album to liked.
                 dbHandler.BridgeUserAndAlbum_AlbumURI(
-                    Session[LOGGED_IN_USERID_SESSION].ToString(),
+                    Session[Constants.LOGGED_IN_USERID_SESSION].ToString(),
                     uri,
                     ApolloDBHandler.BridgingTables.LIKED_ALBUMS);
             }
@@ -432,11 +478,10 @@ namespace Apollo.Controllers {
         {
             using (ApolloDBHandler dbHandler = new ApolloDBHandler())
             {
-                dbHandler.RemoveAlbumFromBridge(Session[LOGGED_IN_USERID_SESSION] as string, uri, table);
+                dbHandler.RemoveAlbumFromBridge(Session[Constants.LOGGED_IN_USERID_SESSION] as string, uri, table);
             }
 
             return Redirect("Albums");
         }
-        #endregion
     }
 }

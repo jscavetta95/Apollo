@@ -3,98 +3,55 @@ using Apollo.Models.Spurify;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using Apollo.Legacy;
+using Apollo.Models;
+using SpotifyAPI.Web;
+using SpotifyAPI.Web.Models;
+using SpotifyAPI.Web.Auth;
+using SpotifyAPI.Web.Enums;
 
 namespace Apollo.Controllers
 {
     public class SpurifyController : Controller {
 
-        #region Constants
-
-        private const string LASTFM_API_KEY = "a4a88b715f00a2baeb78f629bf5787ef";
-        private const string LASTFM_LIMIT = "200";
-
-        public const string TOKENS_SESSION = "tokens";
-        public const string PROGRESS_SESSION = "progress";
-        public const string PLAYLISTID_SESSION = "playlistID";
-
-        #endregion
-
-        #region ActionResult Web Handlers
+        /*
 
         public ActionResult Index() {
-            return View(SpotifyAPILegacy.AUTH_URL);
+            return View();
         }
 
-        public ActionResult Display() {
-            if(Session[TOKENS_SESSION] == null) {
+        public ActionResult Display()
+        {
+            SpotifyWebAPI spotify = SpotifyAuth();
+            if(spotify != null)
+            {
+                return View("Display", spotify.GetUserPlaylists(spotify.GetPrivateProfile().Id).Items);
+            }
+            else
+            {
                 return Redirect("Index");
             }
-
-            SpurifyViewModel viewModel = new SpurifyViewModel() {
-                Playlists = GetPlaylists()
-            };
-
-            return View("Display", viewModel);
         }
 
-        public ActionResult Login() {
-            try {
-                SpotifyTokens tokens = new SpotifyTokens();
-                SpotifyAPILegacy.GetTokens(tokens, Request.QueryString["code"]);
-                Session[TOKENS_SESSION] = tokens;
-            } catch (NotImplementedException) {
-                throw new Exception(Request.QueryString["error"]);
+        private SpotifyWebAPI SpotifyAuth()
+        {
+            WebAPIFactory webApiFactory = new WebAPIFactory(
+                Url.Action("Display", "Spurify"),
+                8000,
+                SpotifyAPIModel.CLIENT_ID,
+                Scope.PlaylistModifyPrivate,
+                TimeSpan.FromSeconds(20));
+
+            try
+            {
+                return webApiFactory.GetWebApi().Result;
             }
-
-            return Redirect("Display");
-        }
-
-        #endregion
-
-        #region Methods
-
-        private List<Playlist> GetPlaylists() {
-            string PLAYLISTS_URI = $"https://api.spotify.com/v1/me/playlists";
-
-            List<Playlist> playlists = new List<Playlist>();
-            string href = string.Empty;
-            string name = string.Empty;
-            bool next = false;
-
-            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPILegacy.MakeAPICall(PLAYLISTS_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
-                while (reader.Read()) {
-
-                    if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("collaborative")) {
-                        next = false;
-
-                        while (!next && reader.Read()) {
-
-                            if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("href")) {
-                                reader.Read();
-                                href = (string)reader.Value;
-
-                                while (!next && reader.Read()) {
-
-                                    if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("name")) {
-                                        reader.Read();
-                                        name = (string)reader.Value;
-                                        playlists.Add(new Playlist(href, name));
-                                        next = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-                return playlists;
+            catch (Exception)
+            {
+                return null;
             }
         }
 
@@ -194,26 +151,6 @@ namespace Apollo.Controllers
             }
         }
 
-        private string GetCurrentUser() {
-            string userID = string.Empty;
-
-            using (JsonReader reader = new JsonTextReader(new StreamReader(SpotifyAPILegacy.MakeAPICall(SpotifyAPILegacy.PROFILE_URI, (SpotifyTokens)Session[TOKENS_SESSION])))) {
-                bool finished = false;
-                while (!finished && reader.Read()) {
-                    if (reader.TokenType.ToString().Equals("PropertyName") && reader.Value.ToString().Equals("id")) {
-                        reader.Read();
-                        userID = (string)reader.Value;
-                        finished = true;
-                    }
-                }
-                return userID;
-            }
-        }
-
-        #endregion
-
-        #region Last.fm API
-
         public JsonResult GetPlaycountsForPlaylistFromLastFM(string user, string playlistJSON) {
             Playlist playlist = JsonConvert.DeserializeObject<Playlist>(playlistJSON);
             FillPlaylistTracks(playlist);
@@ -249,7 +186,6 @@ namespace Apollo.Controllers
             return Json(new { tracks = playlist.Tracks } , JsonRequestBehavior.AllowGet);
         }
 
-        #endregion
-
+        */
     }
 }

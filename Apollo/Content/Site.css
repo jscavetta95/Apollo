@@ -1,15 +1,18 @@
 ﻿/*#region General*/
 
-body {
+body
+{
     padding-top: 50px;
     padding-bottom: 20px;
 }
 
-footer > p {
+footer > p
+{
     margin-left: 15px;
 }
 
-.center {
+.center
+{
     margin: auto;
     text-align: center;
 }
@@ -17,47 +20,83 @@ footer > p {
 /* Override the default bootstrap behavior where horizontal description lists 
    will truncate terms that are too long to fit in the left column 
 */
-.dl-horizontal dt {
+.dl-horizontal dt
+{
     white-space: normal;
 }
 
 /* Set width on the form input elements since they're 100% wide by default */
 input,
 select,
-textarea {
+textarea
+{
     max-width: 280px;
+}
+
+.form-control
+{
+    display: inline-block;
+    width: 30%;
+}
+
+h4 {
+    display: inline-block;
+}
+
+.container
+{
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.text-title
+{
+    font-size: medium;
+}
+
+footer
+{
+    background-color: #e0e0e0;
 }
 
 /*#endregion*/
 
 /*#region NavBar*/
-
-@media (min-width: 768px) {
-    .container > .navbar-header {
+@media (min-width: 768px)
+{
+    .container > .navbar-header
+    {
         margin-left: 15%;
     }
 
-    .navbar-nav {
+    .navbar-nav
+    {
         float: right;
         margin-right: 10%;
     }
 }
 
-@media (max-width: 768px) {
-    .container > .navbar-header {
+@media (max-width: 768px)
+{
+    .container > .navbar-header
+    {
         margin: auto;
     }
 }
 
-.navbar {
+.navbar
+{
     margin: 0;
 }
 
-.navbar-brand {
+.navbar-brand
+{
     font-size: 30px;
 }
 
-.navbar-link {
+.navbar-link
+{
     font-size: 16px;
     float: right;
 }
@@ -66,165 +105,114 @@ textarea {
 
 /*#region Index*/
 
-.panel-primary {
-    background-color: #ecedef;
-    height: 100px;
-    margin: 0;
+.index .link
+{
+    color: #75c1ed;
 }
 
-    .panel-primary > .panel-heading {
-        width: 85%;
-        margin: 0 auto;
-        background: linear-gradient(to right, #ecedef, #6dbb89, #ecedef);
-        border: none;
-        font-family: Circular, Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        color: #fff;
-    }
+.index a
+{
+    color: #fff;
+}
 
-    #index > a:hover {
+    .index a:hover
+    {
         text-decoration: none;
     }
 
-.panel-info {
-    margin: 20px auto;
-    width: 40%;
-    background-color: #353535;
-    color: #fff;
-    font-size: 16px;
-}
-
-    .panel-info > .panel-heading {
-        background: linear-gradient(to right, #353535, #ecedef, #353535);
-        width: 90%;
-        margin: 12px auto;
-        color: #353535;
-        font-weight: bold;
-        border-radius: 0;
-        border-style: none;
-        outline: none;
-    }
-
-    .panel-info > .panel-body > a {
-        color: #75c1ed;
-    }
-
-.panel {
+.panel
+{
     border: none;
     padding: 0;
+}
+
+.panel-index
+{
+    margin: 20px auto;
+    width: 60%;
+    background-color: #4f5253;
+    color: #fff;
+    font-size: 18px;
+}
+
+.panel-heading
+{
+    background: linear-gradient(to right, #4f5253, #ecedef, #4f5253);
+    width: 90%;
+    margin: 0 auto;
+    color: #4f5253;
+    font-family: Circular, Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    border-radius: 0;
+    border-style: none;
+    outline: none;
 }
 
 /*#endregion*/
 
+/*#region Account*/
 
-
-
-
-.btn {
-    font-size: medium;
+.account h5 {
+    display: inline;
 }
 
-.btn-primary,
-.btn-primary.active,
-.btn-primary.disabled {
-    background-color: #6dbb89;
-    border-radius: 20px;
-    border: none;
-}
-    .btn-primary:hover {
-        background-color: #17bf53;
-        border-color: #1ED760;
-    }
+/*#endregion*/
 
-.progress {
-    height: 25px;
-}
+/*#region Login*/
 
-.progress-bar {
-    background-color: #1ED760;
+.panel-login, .panel-register
+{
+    margin: 20px auto;
+    padding: 25px 0 10px 0;
+    width: 70%;
+    background-color: #4f5253;
+    color: #fff;
+    font-size: 16px;
+    min-width:550px;
 }
 
-
-
-td {
-    min-width: 110px;
-}
-
-.fa {
-    font-size: 15px;
-}
-
-.btn-discover {
-    width: 45%;
-    margin: 10px 2px;
-}
-
-.text-title {
-    font-size: medium;
-}
-
-.panel-default {
-    margin: 14px 0;
-    height: 320px;
+.login .btn {
     width: 200px;
 }
 
-    .panel-default > .panel-heading {
-        min-height: 22%;
-    }
-
-    .panel-default > .panel-body {
-        min-height: 78%;
-    }
-
-footer {
-    background-color: #e0e0e0;
+.panel-danger {
+    width: 70%;
+    margin: auto;
+    background-color: #e67f7f;
 }
 
-#login {
-    background-color: #cee5d6;
-    margin: 0;
-    padding: 35px;
-}
-
-#register {
-    background-color: #cedbe5;
-    margin: 0;
-    padding: 35px;
-}
-
-.container {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-}
+/*#endregion*/
 
 /*#region Albums*/
 
-.img-album, .get-next, .get-prev {
+.img-album, .get-next, .get-prev
+{
     display: inline-block;
     position: relative;
 }
 
-.img-album {
-    background-color: lightslategray;
-    border: 2px ridge dimgray;
+.img-album > img
+{
+    border: 3px ridge dimgray;
 }
 
-.get-next, .get-prev {
+.get-next, .get-prev
+{
     height: 250px;
     margin: auto 45px auto 10px;
     z-index: 8;
 }
 
-.selected {
+.selected
+{
     height: 250px;
     width: 250px;
     margin: auto;
     z-index: 10;
 }
 
-.next {
+.next
+{
     height: 225px;
     width: 225px;
     margin-bottom: 12.5px;
@@ -232,7 +220,8 @@ footer {
     z-index: 9;
 }
 
-.prev {
+.prev
+{
     height: 225px;
     width: 225px;
     margin-bottom: 12.5px;
@@ -240,7 +229,8 @@ footer {
     z-index: 9;
 }
 
-.nnext {
+.nnext
+{
     height: 200px;
     width: 200px;
     margin-bottom: 25px;
@@ -248,7 +238,8 @@ footer {
     z-index: 8;
 }
 
-.pprev {
+.pprev
+{
     height: 200px;
     width: 200px;
     margin-bottom: 25px;
@@ -256,13 +247,15 @@ footer {
     z-index: 8;
 }
 
-.btn-albums {
+.btn-albums
+{
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
 }
 
-.btn-remove {
+.btn-remove
+{
     text-align: center;
     font-size: large;
     height: 50px;
@@ -272,74 +265,159 @@ footer {
     border: 2px solid dimgray;
 }
 
-.panel-liked, .panel-passed {
+.panel-liked, .panel-passed
+{
     padding: 25px 0;
+    background-color: #4f5253;
+    width: 90%;
+    float: none;
+    display: inline-block;
+    min-width: 585px;
+    padding: 0 0 15px 0;
+    margin: 15px 0 0 0;
 }
 
-.img-search {
+    .panel-liked > .panel-heading, .panel-passed > .panel-heading
+    {
+        margin-bottom: 20px;
+    }
+
+.img-search
+{
     height: 300px;
     width: 300px;
 }
 
-.selector {
+.selector
+{
     float: left;
 }
 
-.albums input {
-    top: 15%;
+.albums input
+{
+    top: 20%;
     left: 10%;
+    width: 400px;
 }
 
-.albums iframe {
+.albums iframe
+{
     margin: 5px 0 5px 4px;
+}
+
+.panel-search
+{
+    margin: 14px auto;
+    height: 350px;
+    width: 95%;
+    display: inline-block;
+    float: none;
+    background-color: #4f5253;
 }
 
 /*#endregion*/
 
-
-
-
 /*#region Discover*/
-
-.img-selectable {
+.img-selectable
+{
     padding: 8px;
 }
 
-.discover iframe {
+.discover iframe
+{
     height: 100%
 }
 
-.discover .panel-player {
+.discover .panel-player
+{
     width: 315px;
     height: 685px;
     padding-right: 15px;
-    margin-top: 10px;
     display: inline-block;
 }
 
-.discover .panel-albums {
+.discover .panel-albums
+{
     width: 600px;
     height: 700px;
     display: inline-block;
 }
 
-.btn-like {
+.discover .panel-heading
+{
+    width: 100%;
+    background: #ecedef;
+}
+
+.btn-discover
+{
+    width: 45%;
+    margin: 10px 2px;
+}
+
+.btn-like
+{
     background-color: #6dbb89;
     color: #1e1e1e;
 }
-    .btn-like:hover {
+
+    .btn-like:hover
+    {
         background-color: #17bf53;
         color: #1e1e1e;
     }
 
-.btn-pass {
+.btn-pass
+{
     background-color: #e15c5c;
     color: #1e1e1e;
 }
-    .btn-pass:hover {
+
+    .btn-pass:hover
+    {
         background-color: #e54a4a;
         color: #1e1e1e;
     }
 
+.panel-default
+{
+    margin: 14px 0;
+    height: 320px;
+    width: 200px;
+}
+
+    .panel-default > .panel-heading
+    {
+        min-height: 22%;
+    }
+
+    .panel-default > .panel-body
+    {
+        min-height: 78%;
+    }
+
 /*#endregion*/
 
+/*#region Spurify*/
+
+.progress
+{
+    height: 25px;
+}
+
+.progress-bar
+{
+    background-color: #1ED760;
+}
+
+td
+{
+    min-width: 110px;
+}
+
+.fa
+{
+    font-size: 15px;
+}
+
+/*#endregion*/

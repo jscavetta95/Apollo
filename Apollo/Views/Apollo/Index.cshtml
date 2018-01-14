@@ -1,33 +1,43 @@
-﻿@using Apollo.Controllers
+﻿@using Apollo.Models
 @{
     ViewBag.Title = "Apollo";
 }
 
-<div id="index">
+<div class="index">
 
-    @if (Session[ApolloController.LOGGED_IN_USERID_SESSION] != null)
+    @if (Session[Constants.LOGGED_IN_USERID_SESSION] != null)
     {
-        <a href="@Url.Action("Discover")">
-            <div class="panel panel-primary text-center">
-                <h2 class="panel-heading">Welcome back, start discovering now.</h2>
-            </div>
-        </a>
-        <a href="@Url.Action("Albums")">
-            <div class="panel panel-primary text-center">
-                <h2 class="panel-heading">Listen to liked albums and add new album seeds.</h2>
-            </div>
-        </a>
+        <div class="panel panel-index text-center">
+            <a href="@Url.Action("Discover")">
+                <h2 class="panel-heading">Discover Music</h2>
+                <p class="panel-body">
+                    Start discovering now.
+                </p>
+            </a>
+        </div>
+
+        <div class="panel panel-index text-center">
+            <a href="@Url.Action("Albums")">
+                <h2 class="panel-heading">Manage Albums</h2>
+                <p class="panel-body">
+                    Listen to liked albums and add new album seeds.
+                </p>
+            </a>
+        </div>
     }
     else
     {
-        <a href="@Url.Action("Login")">
-            <div class="panel panel-primary text-center">
-                <h2 class="panel-heading">Welcome to Apollo. Register or login to start discovering new music.</h2>
-            </div>
-        </a>
+        <div class="panel panel-index text-center">
+            <a href="@Url.Action("Login")">
+                <h2 class="panel-heading">Welcome to Apollo </h2>
+                <p class="panel-body">
+                    Register or login to start discovering new music.
+                </p>
+            </a>
+        </div>
     }
 
-    <div id="aboutContainer" class="panel panel-info text-center">
+    <div class="panel panel-index text-center">
         <h2 class="panel-heading">What is Apollo</h2>
         <p class="panel-body">
             Apollo is a simple music discovery tool that utilizes the Spotify API. Apollo allows for users to discover
@@ -37,12 +47,12 @@
             broader as similar artists to the liked album's artists are acquired.
             <br /><br />
             All music provided is courtesy of Spotify's collection. For more information on the Spotify API, see
-            <a href="https://developer.spotify.com/web-api/" target="_blank">https://developer.spotify.com/web-api/</a>
+            <a class="link" href="https://developer.spotify.com/web-api/" target="_blank">https://developer.spotify.com/web-api/</a>
         </p>
-        <br />
-        <p class="authorInfo panel-body">
-            Designed and Developed by: <a href="http://josephscavetta.tk/" target="_blank"> Joseph Scavetta</a> <br>
-            Contact Email: <a href="mailto:jscavetta95@gmail.com?Subject=Apollo" target="_top">jscavetta95@gmail.com</a>
+        <p class="panel-body">
+            Designed and Developed by: <a class="link" href="http://josephscavetta.tk/" target="_blank"> Joseph Scavetta</a> <br />
+            Contact Email: <a class="link" href="mailto:jscavetta95@gmail.com?Subject=Apollo" target="_top">jscavetta95@gmail.com</a> <br /> <br />
+            <a class="link" href="https://www.paypal.me/jscavetta95" target="_blank">If you enjoy Apollo consider tipping your server :^)</a> <br />
         </p>
     </div>
 </div>

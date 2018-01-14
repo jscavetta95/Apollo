@@ -5,43 +5,39 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
+using System.Web.Helpers;
 
-namespace Apollo.Controllers {
-    public class ApolloDBHandler : IDisposable {
+namespace Apollo.Controllers
+{
+    public class ApolloDBHandler : IDisposable
+    {
 
-        #region Enums
         public enum BridgingTables { LIKED_ALBUMS, PASSED_ALBUMS, RECOMMEND };
-        #endregion
 
-        #region Constants
         private static readonly string CONNECTION_KEY = ConfigurationManager.AppSettings["DatabaseConnectionString"];
-        #endregion
 
-        #region Fields
         private MySqlConnection dbConnection;
-        #endregion
 
-        #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="ApolloDBHandler"/> class.
         /// </summary>
         /// <exception cref="InvalidOperationException"/>
         /// <exception cref="MySqlException"/>
-        public ApolloDBHandler() {
+        public ApolloDBHandler()
+        {
             // Connect to the database and open the connection.
             dbConnection = new MySqlConnection(CONNECTION_KEY);
             dbConnection.Open();
         }
-        #endregion
 
-        #region Public Methods
         /// <summary>
         /// Gets the user_id from the database using the associated username.
         /// </summary>
         /// <param name="username">The username.</param>
         /// <returns>The user_id</returns>
         /// <exception cref="ArgumentException"></exception>
-        public string GetUserID(string username) {
+        public string GetUserID(string username)
+        {
             // Setup SQL query.
             string sql = "SELECT user_id FROM user WHERE username = @username";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -51,9 +47,12 @@ namespace Apollo.Controllers {
             object result = query.ExecuteScalar();
 
             // Get result.
-            if (result != null) {
+            if (result != null)
+            {
                 return result.ToString();
-            } else {
+            }
+            else
+            {
                 throw new ArgumentException($"Unable to retrieve user_id for {username}", "username");
             }
         }
@@ -62,7 +61,8 @@ namespace Apollo.Controllers {
         /// Inserts the album into the database using the provided album model.
         /// </summary>
         /// <param name="album">The album model.</param>
-        public void InsertAlbum(Album album) {
+        public void InsertAlbum(Album album)
+        {
             // Setup SQL query.
             string sql = "INSERT INTO albums (albumName, albumURI, albumArtist, albumImageLink) VALUES (@albumName, @albumURI, @albumArtist, @albumImageLink)";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -81,7 +81,8 @@ namespace Apollo.Controllers {
         /// <param name="userID">The user identifier.</param>
         /// <param name="albumID">The album identifier.</param>
         /// <param name="table">The table.</param>
-        public void BridgeUserAndAlbum_AlbumID(string userID, string albumID, BridgingTables table) {
+        public void BridgeUserAndAlbum_AlbumID(string userID, string albumID, BridgingTables table)
+        {
             // Setup SQL query.
             string sql = $"INSERT INTO {table.ToString().ToLower()} (user_id, album_id) VALUES (@userID, @albumID)";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -98,7 +99,8 @@ namespace Apollo.Controllers {
         /// <param name="userID">The user identifier.</param>
         /// <param name="albumURI">The album URI.</param>
         /// <param name="table">The table.</param>
-        public void BridgeUserAndAlbum_AlbumURI(string userID, string albumURI, BridgingTables table) {
+        public void BridgeUserAndAlbum_AlbumURI(string userID, string albumURI, BridgingTables table)
+        {
             // Setup SQL query.
             string sql = $"INSERT INTO {table.ToString().ToLower()} (user_id, album_id) VALUES (@userID, (SELECT album_id FROM albums WHERE albumURI = @albumURI))";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -115,7 +117,8 @@ namespace Apollo.Controllers {
         /// <param name="userID">The user identifier.</param>
         /// <param name="table">The bridging table.</param>
         /// <returns></returns>
-        public List<Album> GetAlbumsFromBridge(string userID, BridgingTables table) {
+        public List<Album> GetAlbumsFromBridge(string userID, BridgingTables table)
+        {
             // Setup SQL query.
             string sql = $"SELECT albumName, albumArtist, albumURI, albumImageLink FROM albums JOIN {table.ToString().ToLower()} USING (album_id) WHERE user_id = @userID";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -161,21 +164,32 @@ namespace Apollo.Controllers {
         /// <param name="password">The password.</param>
         /// <returns>The user_id</returns>
         /// <exception cref="ArgumentException"></exception>
-        public string Login(string username, string password) {
+        public string Login(string username, string password)
+        {
             // Setup SQL query.
-            string sql = "SELECT user_id FROM user WHERE username = @username AND password = @password";
+            string sql = "SELECT user_id, password FROM user WHERE username = @username";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
             query.Parameters.AddWithValue("@username", username);
-            query.Parameters.AddWithValue("@password", password);
 
             // Query Database.
-            object result = query.ExecuteScalar();
-
-            // Check result.
-            if (result != null) {
-                return result.ToString();
-            } else {
-                throw new ArgumentException($"Unable to retrieve user_id for {username} and associated password");
+            using (MySqlDataReader results = query.ExecuteReader())
+            {
+                if (results.Read())
+                {
+                    // Check the password.
+                    if (Crypto.VerifyHashedPassword(results.GetString(1), password))
+                    {
+                        return results.GetString(0);
+                    }
+                    else
+                    {
+                        throw new Exception($"Invalid password for {username}.");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Username does not exist.");
+                }
             }
         }
 
@@ -186,7 +200,8 @@ namespace Apollo.Controllers {
         /// <param name="password">The password.</param>
         /// <param name="email">The email.</param>
         /// <returns>The user_id for the newly registered user</returns>
-        public string Register(string username, string password, string email) {
+        public string Register(string username, string password, string email)
+        {
             // Setup SQL query.
             string sql = "INSERT INTO user (username, password, email) VALUES (@username, @password, @email); SELECT LAST_INSERT_ID();";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -203,7 +218,8 @@ namespace Apollo.Controllers {
         /// </summary>
         /// <param name="albumURI">The album URI.</param>
         /// <returns></returns>
-        public Album GetAlbum(string albumURI) {
+        public Album GetAlbum(string albumURI)
+        {
             // Setup SQL query.
             string sql = "SELECT albumName, albumArtist, albumURI, albumImageLink FROM albums WHERE albumURI = @albumUri";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -227,7 +243,8 @@ namespace Apollo.Controllers {
         /// </summary>
         /// <param name="userID">The user identifier.</param>
         /// <returns></returns>
-        public List<Album> GetAllListenedAlbums(string userID) {
+        public List<Album> GetAllListenedAlbums(string userID)
+        {
             // Setup SQL query.
             string sql = $"SELECT albumName, albumArtist, albumURI, albumImageLink FROM albums " +
                          $"LEFT JOIN {BridgingTables.LIKED_ALBUMS.ToString().ToLower()} USING (album_id) " +
@@ -258,7 +275,8 @@ namespace Apollo.Controllers {
         /// </summary>
         /// <param name="userID">The user identifier.</param>
         /// <returns>The email associated with the user identifier.</returns>
-        public string GetEmail(string userID) {
+        public string GetEmail(string userID)
+        {
             // Setup SQL query.
             string sql = "SELECT email FROM user WHERE user_id = @userID";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -267,7 +285,8 @@ namespace Apollo.Controllers {
             // Query database.
             string result = query.ExecuteScalar() as string;
 
-            if (result == null) {
+            if (result == null)
+            {
                 throw new ArgumentException("Cannot find email from user_id");
             }
 
@@ -282,18 +301,34 @@ namespace Apollo.Controllers {
         /// <param name="oldPass">The old password.</param>
         /// <param name="newPass">The new password.</param>
         /// <returns></returns>
-        public bool ChangePassword(string userID, string oldPass, string newPass) {
+        public bool ChangePassword(string userID, string oldPass, string newPass)
+        {
             // Setup SQL query.
-            string sql = "UPDATE user SET password = @newPass WHERE user_id = @userID AND password = @oldPass";
+            string sql = "SELECT password FROM user WHERE user_id = @userID";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
             query.Parameters.AddWithValue("@userID", userID);
-            query.Parameters.AddWithValue("@newPass", newPass);
-            query.Parameters.AddWithValue("@oldPass", oldPass);
 
-            // Query database.
-            int result = query.ExecuteNonQuery();
+            // Query Database.
+            string hashedPass = query.ExecuteScalar() as string;
 
-            return result == 1;
+            // Check passwords.
+            if (Crypto.VerifyHashedPassword(hashedPass, oldPass))
+            {
+                // Setup SQL query.
+                sql = "UPDATE user SET password = @newPass WHERE user_id = @userID";
+                query = new MySqlCommand(sql, dbConnection);
+                query.Parameters.AddWithValue("@userID", userID);
+                query.Parameters.AddWithValue("@newPass", Crypto.HashPassword(newPass));
+
+                // Query database.
+                int result = query.ExecuteNonQuery();
+
+                return result == 1;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -302,7 +337,8 @@ namespace Apollo.Controllers {
         /// <param name="userID">The user identifier.</param>
         /// <param name="newEmail">The new email.</param>
         /// <returns></returns>
-        public bool ChangeEmail(string userID, string newEmail) {
+        public bool ChangeEmail(string userID, string newEmail)
+        {
             // Setup SQL query.
             string sql = "UPDATE user SET email = @newEmail WHERE user_id = @userID";
             MySqlCommand query = new MySqlCommand(sql, dbConnection);
@@ -310,9 +346,16 @@ namespace Apollo.Controllers {
             query.Parameters.AddWithValue("@newEmail", newEmail);
 
             // Query database.
-            int result = query.ExecuteNonQuery();
-
-            return result == 1;
+            int result;
+            try
+            {
+                result = query.ExecuteNonQuery();
+                return result == 1;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -335,15 +378,13 @@ namespace Apollo.Controllers {
 
             return result == 1;
         }
-        #endregion
 
-        #region IDisposable        
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Dispose() {
+        public void Dispose()
+        {
             dbConnection.Clone();
         }
-        #endregion
     }
 }

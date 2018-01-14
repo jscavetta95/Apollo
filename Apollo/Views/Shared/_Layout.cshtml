@@ -1,4 +1,4 @@
-﻿@using Apollo.Controllers
+﻿@using Apollo.Models
 
 <!DOCTYPE html>
 <html>
@@ -22,9 +22,9 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    @if (Session[ApolloController.LOGGED_IN_USERNAME_SESSION] != null)
+                    @if (Session[Constants.LOGGED_IN_USERNAME_SESSION] != null)
                     {
-                        <li class="navbar-link">@Html.ActionLink(Session[ApolloController.LOGGED_IN_USERNAME_SESSION] as string, "Account", "Apollo")</li>
+                        <li class="navbar-link">@Html.ActionLink(Session[Constants.LOGGED_IN_USERNAME_SESSION] as string, "Account", "Apollo")</li>
                     }
                     else
                     {
@@ -32,7 +32,7 @@
                     }
                     <li class="navbar-link">@Html.ActionLink("Discover", "Discover", "Apollo")</li>
                     <li class="navbar-link">@Html.ActionLink("Albums", "Albums", "Apollo")</li>
-                    <li class="navbar-link">@Html.ActionLink("Spurify", "Index", "Spurify")</li>
+                    <li class="navbar-link"><a href="https://www.paypal.me/jscavetta95" target="_blank">Donate</a></li>
                 </ul>
             </div>
         </div>
@@ -46,7 +46,6 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/Scripts/formValidation")
     @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -156,16 +156,15 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ApolloController.cs" />
     <Compile Include="Controllers\ApolloDBHandler.cs" />
-    <Compile Include="Legacy\SpotifyAPILegacy.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Apollo\Album.cs" />
     <Compile Include="Models\Apollo\SearchResult.cs" />
     <Compile Include="Models\Apollo\User.cs" />
+    <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\SpotifyAPIModel.cs" />
     <Compile Include="Models\Spurify\Playlist.cs" />
-    <Compile Include="Models\Spurify\SpurifyViewModel.cs" />
     <Compile Include="Models\Spurify\TimeDurations.cs" />
     <Compile Include="Models\Spurify\Track.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

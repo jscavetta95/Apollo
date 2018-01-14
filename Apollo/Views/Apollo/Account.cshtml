@@ -3,29 +3,31 @@
     ViewBag.Title = "Account";
 }
 
-<div class="text-center">
-    <h4 id="username">@Model.Username</h4>
-    <h4 id="email">@Model.Email</h4>
-</div>
-
-
-<div class="form-horizontal">
-    <div class="form-group text-center">
-        <input id="emailInput" type="email" name="new-email" placeholder="new email" />
-        <input id="emailSubmit" type="submit" class="btn btn-info" value="Change Email" />
+<div class="account form-horizontal">
+    <div class="panel panel-index text-center">
+        <h3 class="panel-heading">Change Email</h3>
+        <div class="panel-body">
+            <h4 id="email">@Model.Email</h4>
+            <input class="form-control" id="emailInput" type="email" name="new-email" placeholder="new email" />
+            <input class="btn btn-info" id="emailSubmit" type="submit" value="Change Email" />
+        </div>
     </div>
-    <div class="form-group text-center">
-        <input id="oldPassInput" type="password" name="old-pass" placeholder="Old Password" />
-        <input id="newPassInput" type="password" name="new-pass" placeholder="New Password" />
-        <input id="passwordSubmit" type="submit" class="btn btn-info" value="Change Password" />
+
+    <div class="panel panel-index text-center">
+        <h3 class="panel-heading">Change Password</h3>
+        <div class="panel-body">
+            <input class="form-control" id="oldPassInput" type="password" name="old-pass" placeholder="Old Password" />
+            <input class="form-control" id="newPassInput" type="password" name="new-pass" placeholder="New Password" />
+            <input class="btn btn-info" id="passwordSubmit" type="submit" value="Change Password" />
+        </div>
     </div>
+
+    <div id="status" class="text-info text-center">
+    </div>
+
     <div class="form-group text-center">
         @Html.ActionLink("Logout", "Logout", "Apollo", new { area = "" }, new { @class = "btn btn-danger" })
     </div>
-</div>
-
-<div id="status" class="text-info text-center">
-
 </div>
 
 @section scripts {

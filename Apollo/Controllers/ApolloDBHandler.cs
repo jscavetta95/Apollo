@@ -1,33 +1,30 @@
-﻿using MySql.Data.MySqlClient;
-using Apollo.Models.Apollo;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Web;
-using System.Web.Helpers;
-
-namespace Apollo.Controllers
+﻿namespace Apollo.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Web.Helpers;
+    using Apollo.Models.Apollo;
+    using MySql.Data.MySqlClient;
+
     public class ApolloDBHandler : IDisposable
     {
-
-        public enum BridgingTables { LIKED_ALBUMS, PASSED_ALBUMS, RECOMMEND };
-
-        private static readonly string CONNECTION_KEY = ConfigurationManager.AppSettings["DatabaseConnectionString"];
-
+        private static readonly string ConnectionKey = ConfigurationManager.AppSettings["DatabaseConnectionString"];
         private MySqlConnection dbConnection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApolloDBHandler"/> class.
         /// </summary>
-        /// <exception cref="InvalidOperationException"/>
-        /// <exception cref="MySqlException"/>
         public ApolloDBHandler()
         {
             // Connect to the database and open the connection.
-            dbConnection = new MySqlConnection(CONNECTION_KEY);
+            dbConnection = new MySqlConnection(ConnectionKey);
             dbConnection.Open();
+        }
+
+        public enum BridgingTables
+        {
+            LIKED_ALBUMS, PASSED_ALBUMS, RECOMMEND
         }
 
         /// <summary>
@@ -35,7 +32,6 @@ namespace Apollo.Controllers
         /// </summary>
         /// <param name="username">The username.</param>
         /// <returns>The user_id</returns>
-        /// <exception cref="ArgumentException"></exception>
         public string GetUserID(string username)
         {
             // Setup SQL query.
@@ -116,7 +112,7 @@ namespace Apollo.Controllers
         /// </summary>
         /// <param name="userID">The user identifier.</param>
         /// <param name="table">The bridging table.</param>
-        /// <returns></returns>
+        /// <returns>A List of Albums retrieved from the specified table.</returns>
         public List<Album> GetAlbumsFromBridge(string userID, BridgingTables table)
         {
             // Setup SQL query.
@@ -133,6 +129,7 @@ namespace Apollo.Controllers
                 {
                     albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
                 }
+
                 return albums;
             }
         }
@@ -153,6 +150,7 @@ namespace Apollo.Controllers
                 {
                     albums.Add(new Album(results.GetString(0), results.GetString(1), results.GetString(2), results.GetString(3)));
                 }
+
                 return albums;
             }
         }
@@ -163,7 +161,6 @@ namespace Apollo.Controllers
         /// <param name="username">The username.</param>
         /// <param name="password">The password.</param>
         /// <returns>The user_id</returns>
-        /// <exception cref="ArgumentException"></exception>
         public string Login(string username, string password)
         {
             // Setup SQL query.
@@ -217,7 +214,7 @@ namespace Apollo.Controllers
         /// Gets the album from the database using the albumURI.
         /// </summary>
         /// <param name="albumURI">The album URI.</param>
-        /// <returns></returns>
+        /// <returns>The specified album</returns>
         public Album GetAlbum(string albumURI)
         {
             // Setup SQL query.
@@ -242,7 +239,7 @@ namespace Apollo.Controllers
         /// Gets all listened albums in the database.
         /// </summary>
         /// <param name="userID">The user identifier.</param>
-        /// <returns></returns>
+        /// <returns>List of all albums related to the userID</returns>
         public List<Album> GetAllListenedAlbums(string userID)
         {
             // Setup SQL query.
@@ -300,7 +297,7 @@ namespace Apollo.Controllers
         /// <param name="userID">The user identifier.</param>
         /// <param name="oldPass">The old password.</param>
         /// <param name="newPass">The new password.</param>
-        /// <returns></returns>
+        /// <returns>True if the password is changed succesfully. False otherwise.</returns>
         public bool ChangePassword(string userID, string oldPass, string newPass)
         {
             // Setup SQL query.
@@ -336,7 +333,7 @@ namespace Apollo.Controllers
         /// </summary>
         /// <param name="userID">The user identifier.</param>
         /// <param name="newEmail">The new email.</param>
-        /// <returns></returns>
+        /// <returns>True if the email is succesfully changed. False otherwise.</returns>
         public bool ChangeEmail(string userID, string newEmail)
         {
             // Setup SQL query.
@@ -364,7 +361,7 @@ namespace Apollo.Controllers
         /// <param name="userID">The user identifier.</param>
         /// <param name="albumURI">The album URI.</param>
         /// <param name="table">The bridging table.</param>
-        /// <returns></returns>
+        /// <returns>True if the album is removed. False otherwise.</returns>
         public bool RemoveAlbumFromBridge(string userID, string albumURI, BridgingTables table)
         {
             // Setup SQL query.

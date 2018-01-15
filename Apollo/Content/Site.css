@@ -60,6 +60,11 @@ footer
     background-color: #e0e0e0;
 }
 
+a:hover, a:visited, a:link, a:active
+{
+    text-decoration: none;
+}
+
 /*#endregion*/
 
 /*#region NavBar*/
@@ -75,6 +80,12 @@ footer
         float: right;
         margin-right: 10%;
     }
+
+    .navbar-link
+    {
+        font-size: 16px;
+        float: right;
+    }
 }
 
 @media (max-width: 768px)
@@ -83,22 +94,17 @@ footer
     {
         margin: auto;
     }
-}
 
-.navbar
-{
-    margin: 0;
+    .navbar-link
+    {
+        font-size: 16px;
+        margin: 0 0 0 15px;
+    }
 }
 
 .navbar-brand
 {
     font-size: 30px;
-}
-
-.navbar-link
-{
-    font-size: 16px;
-    float: right;
 }
 
 /*#endregion*/
@@ -115,11 +121,6 @@ footer
     color: #fff;
 }
 
-    .index a:hover
-    {
-        text-decoration: none;
-    }
-
 .panel
 {
     border: none;
@@ -129,7 +130,7 @@ footer
 .panel-index
 {
     margin: 20px auto;
-    width: 60%;
+    width: 70%;
     background-color: #4f5253;
     color: #fff;
     font-size: 18px;
@@ -146,6 +147,15 @@ footer
     border-radius: 0;
     border-style: none;
     outline: none;
+}
+
+@media (max-width: 768px)
+{
+    .panel-index
+    {
+        width: 100%;
+        font-size: 14px;
+    }
 }
 
 /*#endregion*/
@@ -168,7 +178,6 @@ footer
     background-color: #4f5253;
     color: #fff;
     font-size: 16px;
-    min-width:550px;
 }
 
 .login .btn {
@@ -181,6 +190,15 @@ footer
     background-color: #e67f7f;
 }
 
+@media (max-width: 768px)
+{
+    .panel-login, .panel-register
+    {
+        width: 100%;
+        font-size: 14px;
+    }
+}
+
 /*#endregion*/
 
 /*#region Albums*/
@@ -189,61 +207,52 @@ footer
 {
     display: inline-block;
     position: relative;
+    vertical-align: middle;
 }
 
-.img-album > img
-{
-    border: 3px ridge dimgray;
-}
+    .img-album > img
+    {
+        border: 3px ridge dimgray;
+    }
 
 .get-next, .get-prev
 {
-    height: 250px;
+    height: 100%;
     margin: auto 45px auto 10px;
-    z-index: 8;
 }
 
 .selected
 {
-    height: 250px;
-    width: 250px;
+    width: 40%;
     margin: auto;
     z-index: 10;
 }
 
 .next
 {
-    height: 225px;
-    width: 225px;
-    margin-bottom: 12.5px;
-    margin-left: -150px;
+    width: 35%;
+    margin-left: -26%;
     z-index: 9;
 }
 
 .prev
 {
-    height: 225px;
-    width: 225px;
-    margin-bottom: 12.5px;
-    margin-right: -150px;
+    width: 35%;
+    margin-right: -26%;
     z-index: 9;
 }
 
 .nnext
 {
-    height: 200px;
-    width: 200px;
-    margin-bottom: 25px;
-    margin-left: -175px;
+    width: 30%;
+    margin-left: -27%;
     z-index: 8;
 }
 
 .pprev
 {
-    height: 200px;
-    width: 200px;
-    margin-bottom: 25px;
-    margin-right: -175px;
+    width: 30%;
+    margin-right: -27%;
     z-index: 8;
 }
 
@@ -263,17 +272,20 @@ footer
     background-color: #ce2e2e;
     border-radius: 25px;
     border: 2px solid dimgray;
+    margin: 0 0 15px 0;
+}
+
+.albums > div {
+    padding: 0;
 }
 
 .panel-liked, .panel-passed
 {
-    padding: 25px 0;
+    padding: 0;
     background-color: #4f5253;
-    width: 90%;
+    width: 98%;
     float: none;
     display: inline-block;
-    min-width: 585px;
-    padding: 0 0 15px 0;
     margin: 15px 0 0 0;
 }
 
@@ -284,8 +296,8 @@ footer
 
 .img-search
 {
-    height: 300px;
-    width: 300px;
+    height: 165px;
+    width: 165px;
 }
 
 .selector
@@ -295,8 +307,7 @@ footer
 
 .albums input
 {
-    top: 20%;
-    left: 10%;
+    margin: 10px 0 0 15px;
     width: 400px;
 }
 
@@ -308,11 +319,24 @@ footer
 .panel-search
 {
     margin: 14px auto;
-    height: 350px;
-    width: 95%;
+    height: 100%;
+    width: 98%;
     display: inline-block;
     float: none;
     background-color: #4f5253;
+}
+
+@media (max-width: 768px)
+{
+    .panel-search
+    {
+        width: 100%;
+    }
+
+    .panel-liked, .panel-passed
+    {
+        width: 100%;
+    }
 }
 
 .albums .form-control 
@@ -389,6 +413,7 @@ footer
     margin: 14px 0;
     height: 320px;
     width: 200px;
+    float: left;
 }
 
     .panel-default > .panel-heading
@@ -401,10 +426,32 @@ footer
         min-height: 78%;
     }
 
+@media (max-width: 768px)
+{
+    .discover .panel-player
+    {
+        width: 100%;
+        height: 100px;
+        padding: 15px 0 0 0;
+
+    }
+
+    .discover .panel-albums
+    {
+        width: 100%;
+        height: 100%;
+    }
+
+    .panel-default
+    {
+        width: 50%;
+        max-width: 230px;
+    }
+}
+
 /*#endregion*/
 
 /*#region Spurify*/
-
 .progress
 {
     height: 25px;

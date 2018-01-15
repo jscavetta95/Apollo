@@ -1,44 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿namespace Apollo.Models.Spurify
+{
+    using System;
 
-namespace Apollo.Models.Spurify {
-    public class Track {
-        
-        #region Properties
-
-        public string Name { get; set; }
-        public string Artist { get; set; }
-        public string Uri { get; set; }
-        public int PlayCount { get; set; }
-
-        #endregion
-
-        #region Constructor
-
-        public Track(string name, string artist, string uri) {
+    public class Track
+    {
+        public Track(string name, string artist, string uri)
+        {
             Name = name;
             Artist = artist;
             Uri = uri;
         }
 
-        #endregion
+        public string Name { get; set; }
 
-        #region Override Methods
+        public string Artist { get; set; }
 
-        public override int GetHashCode() {
+        public string Uri { get; set; }
+
+        public int PlayCount { get; set; }
+
+        public override int GetHashCode()
+        {
             return (Name.ToLower() + Artist.ToLower()).GetHashCode();
         }
 
-        public override bool Equals(Object obj) {
-            return ((obj is Track) && (Name.Equals(((Track)obj).Name)) && (Artist.Equals(((Track)obj).Artist)));
+        public override bool Equals(object obj)
+        {
+            return (obj is Track) && Name.Equals(((Track)obj).Name) && Artist.Equals(((Track)obj).Artist);
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Name;
         }
-
-        #endregion
     }
 }

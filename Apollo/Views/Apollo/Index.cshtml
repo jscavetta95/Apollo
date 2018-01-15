@@ -5,7 +5,7 @@
 
 <div class="index">
 
-    @if (Session[Constants.LOGGED_IN_USERID_SESSION] != null)
+    @if (Session[Constants.UserIDSession] != null)
     {
         <div class="panel panel-index text-center">
             <a href="@Url.Action("Discover")">
@@ -48,6 +48,11 @@
             <br /><br />
             All music provided is courtesy of Spotify's collection. For more information on the Spotify API, see
             <a class="link" href="https://developer.spotify.com/web-api/" target="_blank">https://developer.spotify.com/web-api/</a>
+            <br /><br />
+            Special thanks to JohnnyCrazy and contributors for  
+            <a class="link" href="https://github.com/JohnnyCrazy/SpotifyAPI-NET" target="_blank">SpotifyAPI-NET</a>
+            and to the DotNetAnalyzers team for 
+            <a class="link" href="https://github.com/DotNetAnalyzers/StyleCopAnalyzers" target="_blank">StyleCopAnalyzers</a>.
         </p>
         <p class="panel-body">
             Designed and Developed by: <a class="link" href="http://josephscavetta.tk/" target="_blank"> Joseph Scavetta</a> <br />

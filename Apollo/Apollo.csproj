@@ -233,6 +233,8 @@
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Apollo.ruleset" />
+    <None Include="Properties\PublishProfiles\apollo - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\apollo - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\Apollo23 - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.2.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.2.1.js" />
